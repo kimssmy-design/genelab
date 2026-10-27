@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GENE LAB · 결과 공개 (교사용)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="helix" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2c0 6 10 6 10 10S7 16 7 22M17 2c0 6-10 6-10 10s10 4 10 10M8 5h8M8 19h8M10 9h4M10 15h4"/></svg>
+    GENE LAB <span class="mono">결과 공개</span>
+  </div>
+  <div class="topbar-right hidden" id="dashTools">
+    <select id="clsSelect" class="cls-select"></select>
+    <span class="mono" id="subCount"></span>
+    <button class="btn btn-sm" id="refreshBtn">새로고침</button>
+    <button class="btn btn-sm" id="tvBtn">글자 크게</button>
+  </div>
+</header>
+
+<!-- 잠금 화면 -->
+<section class="lock" id="lockScr">
+  <div class="lock-box">
+    <h2>교사용 대시보드</h2>
+    <p class="muted">비밀번호를 입력하세요.</p>
+    <div class="login-row">
+      <input type="password" id="pwInput" class="pw-input mono" placeholder="••••" autocomplete="off">
+      <button class="btn btn-ink" id="pwBtn">열기</button>
+    </div>
+    <p class="err" id="pwErr"></p>
+  </div>
+</section>
+
+<!-- 대시보드 본문 -->
+<main class="hidden" id="dashScr">
+<nav class="view-tabs">
+  <button class="vtab on" data-view="viewStats">통계</button>
+  <button class="vtab" data-view="viewAnswers">답변 모아보기</button>
+</nav>
+
+<div class="dash" id="viewStats">
+  <section class="stats">
+    <div class="stat-block">
+      <div class="stat-head">
+        <h3>형편 단계별 평균 편집 개수</h3>
+        <div class="legend"><span><i class="sw sw-treat"></i>치료</span><span><i class="sw sw-border"></i>경계</span><span><i class="sw sw-enh"></i>향상</span></div>
+      </div>
+      <div id="statEdit"></div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-head"><h3>형편 단계별 평균 사용 금액</h3><span class="muted small">의도하지 않은 변화를 겪은 학생</span></div>
+      <div id="statMoney"></div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-head">
+        <h3>어디까지 허용해야 할까? (Q3)</h3>
+        <div class="legend"><span><i class="sw sw-ban"></i>전면 금지</span><span><i class="sw sw-treat"></i>치료만</span><span><i class="sw sw-enh"></i>향상까지</span></div>
+      </div>
+      <div id="statQ3"></div>
+    </div>
+  </section>
+
+  <section class="roster">
+    <div class="stat-head"><h3>학생 결과 카드</h3><span class="muted small">번호를 누르면 크게 보여요</span></div>
+    <div class="chips" id="chips"></div>
+  </section>
+</div>
+
+<!-- 답변 모아보기 -->
+<div class="answers hidden" id="viewAnswers">
+  <div class="ans-controls">
+    <div class="seg-row" id="ansQ"></div>
+    <div class="seg-row" id="ansLv"></div>
+  </div>
+  <h3 class="ans-title" id="ansTitle"></h3>
+  <p class="muted small" id="ansCount"></p>
+  <div class="ans-list" id="ansList"></div>
+</div>
+</main>
+
+<!-- 결과 카드 크게 보기 -->
+<div class="viewer hidden" id="viewer">
+  <div class="viewer-bar">
+    <span class="muted small" id="viewerHint"></span>
+    <div class="viewer-actions">
+      <button class="btn btn-sm" id="cmpBtn">나란히 비교</button>
+      <button class="btn btn-sm" id="jpgBtn">JPG 저장</button>
+      <button class="btn btn-sm btn-ink" id="closeBtn">닫기</button>
+    </div>
+  </div>
+  <div class="pick-strip hidden" id="pickStrip"></div>
+  <div class="viewer-cards" id="viewerCards"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/util.js"></script>
+<script src="js/data-options.js"></script>
+<script src="js/simulate.js"></script>
+<script src="js/api.js"></script>
+<script src="js/result-card.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

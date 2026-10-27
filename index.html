@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GENE LAB 2045 · 유전자 편집 쇼핑몰</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Gowun+Batang&display=swap">
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/student.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="helix" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2c0 6 10 6 10 10S7 16 7 22M17 2c0 6-10 6-10 10s10 4 10 10M8 5h8M8 19h8M10 9h4M10 15h4"/></svg>
+    GENE LAB <span id="yearLabel" class="mono">2045</span>
+  </div>
+  <div class="topbar-right">
+    <span id="stepLabel" class="mono muted"></span>
+    <button class="btn btn-sm" id="helpBtn">? 사용법</button>
+  </div>
+</header>
+
+<main>
+  <!-- 1. 학번 입력 -->
+  <section class="screen active" id="scr-login">
+    <div class="login-wrap">
+      <p class="mono muted eyebrow">연구 참여자 등록</p>
+      <h1>유전자 편집 쇼핑몰</h1>
+      <p class="lead">2045년, 태어날 아기의 유전자를 돈으로 고를 수 있게 되었어요.<br>여러분은 곧 부모가 됩니다.</p>
+      <div class="login-row">
+        <input id="idInput" class="id-input mono" inputmode="numeric" maxlength="4" placeholder="3105" autocomplete="off">
+        <button class="btn btn-ink" id="loginBtn">카드 받기</button>
+      </div>
+      <p class="err" id="loginErr"></p>
+    </div>
+  </section>
+
+  <!-- 1. 형편 카드 -->
+  <section class="screen" id="scr-card">
+    <div class="card-wrap">
+      <div class="flip" id="flip">
+        <div class="flip-inner">
+          <div class="face face-back">
+            <span class="mono">FAMILY CARD</span>
+            <div class="seq mono" aria-hidden="true">ATGCGTACCTGAATGCCGTA<br>TACGCATGGACTTACGGCAT<br>GGCTTAACGTACGATCCGTA<br>CCGAATTGCATGCATCCGGA</div>
+            <span class="tap mono">터치해서 뒤집기</span>
+          </div>
+          <div class="face face-front">
+            <span class="mono muted" id="cardLevel">LEVEL</span>
+            <div>
+              <p class="card-name" id="cardName"></p>
+              <p class="card-budget mono" id="cardBudget"></p>
+            </div>
+            <p class="card-note" id="cardNote"></p>
+          </div>
+        </div>
+      </div>
+      <div class="card-after invisible" id="cardAfter">
+        <p class="muted" id="cardWho"></p>
+        <h2>우리 집 형편 카드예요</h2>
+        <p class="muted">카드는 반 친구들마다 달라요. 이 예산 안에서 아기의 유전자를 골라야 해요.</p>
+        <p class="random-note small">카드는 무작위로 나눠 주며, 실제 가정 형편과는 관계없어요.</p>
+        <button class="btn btn-ink" id="startShopBtn">유전자 쇼핑 시작</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 쇼핑몰 -->
+  <section class="screen" id="scr-shop">
+    <div class="shop">
+      <aside class="shop-panel" id="shopPanel">
+        <div class="panel-head">
+          <div id="shopLevel" class="panel-level"></div>
+          <div class="muted small mono" id="shopBudget"></div>
+        </div>
+        <div class="panel-money">
+          <span class="muted small">남은 예산</span>
+          <span class="remain mono" id="remain"></span>
+          <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+          <span class="muted small mono" id="spentLine"></span>
+          <span class="voucher hidden" id="voucherNote"></span>
+        </div>
+        <button class="cart-toggle" id="cartToggle">선택한 유전자 <b id="cartCount">0</b><span class="chev">▾</span></button>
+        <ul class="cart" id="cartList"></ul>
+        <button class="btn btn-ink btn-block" id="birthBtn">아이 탄생시키기</button>
+      </aside>
+      <section class="catalog">
+        <div class="tabs" id="catTabs"></div>
+        <p class="cat-note muted small" id="catNote"></p>
+        <p class="shop-banner hidden" id="shopBanner"></p>
+        <div class="opt-grid" id="optGrid"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- 3. 20년 후 리포트 -->
+  <section class="screen" id="scr-report">
+    <div class="two-col">
+      <div class="pane">
+        <p class="mono muted small">SUBJECT PROFILE</p>
+        <h2>내 아이, 20세</h2>
+        <p class="prof-line" id="profLine"></p>
+        <p class="muted" id="profSummary"></p>
+        <ul class="rc-picks" id="profPicks"></ul>
+      </div>
+      <div class="pane pane-plain">
+        <p class="mono muted small">2065년의 뉴스</p>
+        <ul class="news-list" id="newsList"></ul>
+      </div>
+    </div>
+    <div class="screen-foot"><button class="btn btn-ink" id="toLetterBtn">아이에게서 온 편지</button></div>
+  </section>
+
+  <!-- 4. 편지 + 성찰 질문 -->
+  <section class="screen" id="scr-letter">
+    <div class="two-col">
+      <div class="letter">
+        <p class="letter-to">엄마, 아빠에게</p>
+        <p class="letter-text" id="letterText"></p>
+        <p class="letter-from">2065년, 스무 살이 된 아이가</p>
+      </div>
+      <div class="pane pane-plain">
+        <div id="qForm"></div>
+        <div class="prog hidden" id="submitProg">
+          <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+          <span class="muted small" id="progLabel"></span>
+        </div>
+        <p class="err" id="submitErr"></p>
+        <div class="right"><button class="btn btn-ink" id="submitBtn">제출하기</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 제출 완료 -->
+  <section class="screen" id="scr-done">
+    <div class="done-wrap">
+      <h2>제출했어요</h2>
+      <p class="muted">선생님 화면에서 반 전체 결과를 함께 볼 거예요. 그때까지 기다려 주세요.</p>
+      <div id="doneCard"></div>
+      <div class="done-actions">
+        <button class="btn" id="editBtn">답변 고치기</button>
+        <button class="btn-text" id="homeBtn">처음 화면으로</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="year-jump hidden" id="yearJump" aria-live="polite">
+  <span class="mono muted">20년 후</span>
+  <span class="year-num mono" id="yearNum">2045</span>
+</div>
+
+<div class="modal hidden" id="modal"><div class="modal-box" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/util.js"></script>
+<script src="js/data-options.js"></script>
+<script src="js/data-story.js"></script>
+<script src="js/simulate.js"></script>
+<script src="js/api.js"></script>
+<script src="js/result-card.js"></script>
+<script src="js/student-app.js"></script>
+<script src="js/student-login.js"></script>
+<script src="js/student-shop.js"></script>
+<script src="js/student-report.js"></script>
+<script src="js/student-letter.js"></script>
+</body>
+</html>
