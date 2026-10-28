@@ -20,7 +20,9 @@ GL.Shop = {
     return GL.state.picks.reduce(function (sum, id) { return sum + GL.Shop.priceOf(GL.optById[id]); }, 0);
   },
 
-  remaining: function () { return GL.state.budget - GL.Shop.spent(); },
+  // 쓸 수 있는 돈 = 형편 카드 예산 + 아르바이트로 번 돈
+  total: function () { return GL.state.budget + (GL.state.earned || 0); },
+  remaining: function () { return GL.Shop.total() - GL.Shop.spent(); },
 
   // 고를 수 있는지 + 못 고르는 이유
   check: function (o) {
@@ -59,6 +61,7 @@ GL.Shop = {
     GL.Shop.renderTabs();
     GL.Shop.render();
     GL.util.$('birthBtn').onclick = GL.Shop.birthConfirm;
+    GL.util.$('jobBtn').onclick = GL.Job.open;
     GL.util.$('cartToggle').onclick = function () {
       GL.util.$('shopPanel').classList.toggle('open');
     };
@@ -124,17 +127,18 @@ GL.Shop = {
     if (any) { b.classList.add('hidden'); return; }
     b.classList.remove('hidden');
     b.textContent = GL.state.picks.length
-      ? '남은 예산으로 더 고를 수 있는 유전자가 없어요. 카드를 눌러 설명은 읽어 볼 수 있어요.'
-      : '우리 집 예산으로는 고를 수 있는 유전자가 없어요. 카드를 눌러 설명은 읽어 볼 수 있어요.';
+      ? '남은 예산으로 더 고를 수 있는 유전자가 없어요. 왼쪽의 아르바이트로 돈을 더 벌 수 있어요.'
+      : '우리 집 예산으로는 고를 수 있는 유전자가 없어요. 왼쪽의 아르바이트로 돈을 벌 수 있어요.';
   },
 
   renderPanel: function () {
     var u = GL.util;
     var S = GL.state;
     var spent = GL.Shop.spent();
-    var remain = S.budget - spent;
+    var total = GL.Shop.total();
+    var remain = total - spent;
     u.$('remain').textContent = u.money(remain);
-    var pct = S.budget > 0 ? Math.round(remain / S.budget * 100) : 0;
+    var pct = total > 0 ? Math.round(remain / total * 100) : 0;
     u.$('barFill').style.width = pct + '%';
     u.$('spentLine').textContent = u.money(spent) + ' 사용';
 
@@ -146,6 +150,7 @@ GL.Shop = {
       vNote.classList.add('hidden');
     }
 
+    GL.Job.renderPanel();
     u.$('cartCount').textContent = S.picks.length;
     var cart = u.$('cartList');
     if (!S.picks.length) {

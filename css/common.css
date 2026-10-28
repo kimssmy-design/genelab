@@ -134,6 +134,7 @@ button { font-family: inherit; font-size: inherit; color: inherit; cursor: point
 .rc-money { font-size: 13px; color: var(--muted); margin: 4px 0 10px; }
 .rc-meta { font-size: 12px; color: var(--muted); margin: -6px 0 10px; }
 .rc-meta.multi { color: var(--danger); }
+.rc-summary { font-size: 14px; line-height: 1.7; background: var(--bg); border-radius: 8px; padding: 10px 12px; margin: 0 0 10px; word-break: keep-all; }
 .rc-counts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 14px; margin-bottom: 10px; }
 .rc-picks { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
 .rc-pick {

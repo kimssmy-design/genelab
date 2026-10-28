@@ -26,6 +26,14 @@ GL.STORY.COND_NEWS = [ // 위에 있을수록 우선
     when: function (s) { return !!(s.ids.mstn || s.ids.actn3); } },
   { t: '"편집 아이" 부모 기대 압박… 청소년 상담 급증', tone: 'warn', sec: '교육',
     when: function (s) { return s.enhance >= 3; } },
+  { t: '영재고 합격자 절반이 "지능·기억력 편집"… 사교육 대신 "유전자 교육" 시대', tone: 'bad', sec: '교육',
+    when: function (s) { return !!(s.ids.iq || s.ids.mem); } },
+  { t: '아이돌 오디션 합격자 90%가 편집 출신… "타고난 재능만 남았다"', tone: 'warn', sec: '문화',
+    when: function (s) { return !!(s.ids.dance || s.ids.voice); } },
+  { t: '"복사 얼굴 세대"… 비슷한 얼굴에 오디션 심사위원 "개성이 사라졌다"', tone: 'warn', sec: '사회',
+    when: function (s) { return !!(s.ids.model || s.ids.features || s.ids.eyelid); } },
+  { t: '"먹어도 안 찌는 몸" 편집 인기… 청소년 몸 평가 압박은 오히려 커져', tone: 'warn', sec: '사회',
+    when: function (s) { return !!s.ids.mc4r; } },
   { t: '유전병 걱정 없는 첫 세대, 성인이 되다', tone: 'good', sec: '보건',
     when: function (s) { return s.total > 0 && s.enhance === 0; } }
 ];
@@ -43,40 +51,7 @@ GL.STORY.pickNews = function (s) {
   return list.concat(extra.slice(0, 2));
 };
 
-/* ---------- 아이의 편지 (위에서부터 먼저 맞는 것 하나) ---------- */
-GL.STORY.pickLetter = function (s) {
-  var hasPersonality = GL.PERSONALITY_IDS.some(function (id) { return s.ids[id]; });
-
-  if (s.side > 0) {
-    return { type: '①의도치않은변화', text:
-      '요즘 몸이 이상해서 병원에 갔는데, 의사 선생님이 태어나기 전에 받은 「' + s.firstSide.name +
-      '」 편집 때문일 수도 있대요. 두 분이 저 잘되라고 한 거 알아요. 그런데 그때 저는 아무것도 고를 수 없었잖아요. ' +
-      '저한테 물어볼 수 있었다면, 저는 뭐라고 대답했을까요?' };
-  }
-  if (hasPersonality) {
-    return { type: '②성격편집', text:
-      '친구가 그러는데, 제 성격도 태어나기 전에 고른 거래요. 정말이에요? ' +
-      '그럼 지금 친구를 걱정하는 이 마음은 진짜 제 마음일까요, 아니면 두 분이 돈을 주고 산 마음일까요?' };
-  }
-  if (s.enhance >= 3) {
-    return { type: '③향상다수', text:
-      '상을 받아도 사람들이 그래요. "원래 그렇게 태어났잖아." 밤새 연습한 날도 많았는데, ' +
-      '이게 제 노력인지 유전자 덕분인지 이제는 저도 모르겠어요. 가끔은 그냥 평범하게 태어났으면 어땠을까 생각해요.' };
-  }
-  if (s.enhance >= 1) {
-    return { type: '⑥향상일부', text:
-      '엄마 아빠가 골라 준 「' + s.firstEnh.name + '」 덕분에 좋은 일이 많았어요. ' +
-      '그런데 친구들 중에는 이런 걸 고를 수 없었던 아이가 훨씬 많아요. 제가 노력해서 얻은 게 아닌 걸로 앞서가는 게 가끔은 미안해요. 이게 공평한 걸까요?' };
-  }
-  if (s.total > 0) {
-    return { type: '④치료만', text:
-      '아프지 않게 해 줘서 고마워요. 덕분에 하고 싶은 걸 마음껏 하면서 자랐어요. ' +
-      '그런데 같은 병을 가진 친구는 아직도 병원에 다녀요. 그 친구네 집도 할 수 있었으면 좋았을 텐데요.' };
-  }
-  return { type: '⑤편집없음', text:
-    '우리 집이 못 해 준 거, 원망 안 해요. 진짜로요. 그런데 면접에서 "편집 안 하셨네요?"라는 말을 들었을 때는 기분이 좀 이상했어요. ' +
-    '저는 그냥 저인데, 왜 모자란 사람이 된 것 같을까요?' };
-};
+/* 아이의 편지는 data-letter.js 에서 만들어요. */
 
 /* ---------- 리포트 첫 줄: 스무 살 아이 소개 ---------- */
 GL.STORY.profileLine = function (s) {

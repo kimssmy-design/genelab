@@ -3,6 +3,7 @@
    학생 완료 화면과 교사 대시보드에서 똑같이 사용
    rec = { id, name, level, budget, spent, picks:[{id,status}], q1, q2, q3choice, q3, q4, count, time }
    opts.meta = true 이면 제출 횟수·시간 표시 (대시보드용)
+   opts.summary = true 이면 종합 해설 첫 문단 표시 (data-life.js 필요)
    ========================================================= */
 GL.ResultCard = {
   html: function (rec, opts) {
@@ -35,7 +36,8 @@ GL.ResultCard = {
           '<div><span class="rc-num mono">' + u.esc(num) + '번</span> <span class="rc-name">' + u.esc(rec.name) + '</span></div>' +
           '<span class="lv-chip lv' + rec.level + '">L' + rec.level + ' ' + u.esc(lv.short) + '</span>' +
         '</header>' +
-        '<div class="rc-money mono">예산 ' + u.money(rec.budget) + ' · 사용 ' + u.money(rec.spent) + '</div>' +
+        '<div class="rc-money mono">예산 ' + u.money(rec.budget) +
+          (rec.earned ? ' + 알바 ' + u.money(rec.earned) : '') + ' · 사용 ' + u.money(rec.spent) + '</div>' +
         (opts.meta ? '<div class="rc-meta mono' + (rec.count > 1 ? ' multi' : '') + '">제출 ' + (rec.count || 1) + '회' +
           (rec.time ? ' · 마지막 ' + u.esc(rec.time) : '') + '</div>' : '') +
         '<div class="rc-counts">' +
@@ -45,6 +47,8 @@ GL.ResultCard = {
           '<span class="tag tag-enh">향상 ' + s.enhance + '</span>' +
           (s.side ? '<span class="tag tag-side">변화 ' + s.side + '</span>' : '') +
         '</div>' +
+        (opts.summary && GL.LIFE_SUMMARY
+          ? '<p class="rc-summary">' + u.esc(GL.LIFE_SUMMARY(rec)[0]) + '</p>' : '') +
         '<ul class="rc-picks">' + pickHtml + '</ul>' +
         '<div class="rc-answers">' +
           ans('Q1 좋은 점', rec.q1) +

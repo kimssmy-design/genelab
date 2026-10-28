@@ -83,7 +83,9 @@
           <div class="bar"><div class="bar-fill" id="barFill"></div></div>
           <span class="muted small mono" id="spentLine"></span>
           <span class="voucher hidden" id="voucherNote"></span>
+          <span class="earned-line mono hidden" id="earnedLine"></span>
         </div>
+        <button class="btn btn-job" id="jobBtn">아르바이트 하기</button>
         <button class="cart-toggle" id="cartToggle">선택한 유전자 <b id="cartCount">0</b><span class="chev">▾</span></button>
         <ul class="cart" id="cartList"></ul>
         <button class="btn btn-ink btn-block" id="birthBtn">아이 탄생시키기</button>
@@ -105,11 +107,16 @@
         <h2>내 아이, 20세</h2>
         <p class="prof-line" id="profLine"></p>
         <p class="muted" id="profSummary"></p>
-        <ul class="rc-picks" id="profPicks"></ul>
+        <ul class="story-list" id="profPicks"></ul>
+        <p class="muted small more-hint hidden" id="moreHint">나머지 유전자는 눌러서 이야기를 펼쳐 보세요.</p>
       </div>
       <div class="pane pane-plain">
         <p class="mono muted small">2065년의 뉴스</p>
         <ul class="news-list" id="newsList"></ul>
+        <section class="life-summary">
+          <p class="mono muted small">20년의 종합 해설</p>
+          <div id="lifeSummary"></div>
+        </section>
       </div>
     </div>
     <div class="screen-foot"><button class="btn btn-ink" id="toLetterBtn">아이에게서 온 편지</button></div>
@@ -120,7 +127,7 @@
     <div class="two-col">
       <div class="letter">
         <p class="letter-to">엄마, 아빠에게</p>
-        <p class="letter-text" id="letterText"></p>
+        <div class="letter-text" id="letterText"></div>
         <p class="letter-from">2065년, 스무 살이 된 아이가</p>
       </div>
       <div class="pane pane-plain">
@@ -161,12 +168,16 @@
 <script src="js/util.js"></script>
 <script src="js/data-options.js"></script>
 <script src="js/data-story.js"></script>
+<script src="js/data-quiz.js"></script>
+<script src="js/data-life.js"></script>
+<script src="js/data-letter.js"></script>
 <script src="js/simulate.js"></script>
 <script src="js/api.js"></script>
 <script src="js/result-card.js"></script>
 <script src="js/student-app.js"></script>
 <script src="js/student-login.js"></script>
 <script src="js/student-shop.js"></script>
+<script src="js/student-job.js"></script>
 <script src="js/student-report.js"></script>
 <script src="js/student-letter.js"></script>
 </body>

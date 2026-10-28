@@ -52,6 +52,7 @@ GL.Login = {
       S.results = sub.picks || [];
       S.picks = S.results.map(function (p) { return p.id; });
       S.spent = Number(sub.spent) || 0;
+      S.earned = Number(sub.earned) || 0;
       S.answers = { q1: sub.q1, q2: sub.q2, q3: sub.q3, q4: sub.q4, q3choice: sub.q3choice };
       S.submitted = true;
       S.count = Number(sub.count) || 1;

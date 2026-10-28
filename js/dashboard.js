@@ -93,6 +93,7 @@ GL.Dash = {
     GL.util.$('subCount').textContent = '제출 ' + subs.length + '/' + D.classRoster().length;
     D.renderEdit(subs);
     D.renderMoney(subs);
+    D.renderEarn(subs);
     D.renderQ3(subs);
     D.renderChips();
     D.renderAnswers();
@@ -145,6 +146,19 @@ GL.Dash = {
         '<span class="mono money-val">' + (list.length ? GL.util.money(D.avg(list, 'spent')) : '—') + '</span>' +
         '<span class="mono muted small">예산 ' + GL.util.money(GL.LEVELS[lv].budget) + '</span>' +
         '<span class="row-val mono' + (sideN ? ' side-val' : '') + '">' + (list.length ? sideN + '명' : '—') + '</span></div>';
+    }).join('');
+  },
+
+  renderEarn: function (subs) {
+    var D = GL.Dash;
+    var g = D.byLevel(subs);
+    var max = GL.QUIZ_MAX || 500;
+    GL.util.$('statEarn').innerHTML = [1, 2, 3, 4, 5].map(function (lv) {
+      var list = g[lv];
+      var avg = D.avg(list, 'earned');
+      return '<div class="stat-row">' + D.rowLabel(lv, list.length) +
+        '<div class="sbar"><span class="seg-earn" style="width:' + Math.min(100, avg / max * 100) + '%"></span></div>' +
+        '<span class="row-val mono">' + (list.length ? Math.round(avg) + '만' : '—') + '</span></div>';
     }).join('');
   },
 
@@ -248,7 +262,7 @@ GL.Dash = {
     var D = GL.Dash;
     var u = GL.util;
     u.$('viewerCards').className = 'viewer-cards' + (D.viewIds.length > 1 ? ' two' : '');
-    u.$('viewerCards').innerHTML = D.viewIds.map(function (id) { return GL.ResultCard.html(D.subs[id], { meta: true }); }).join('');
+    u.$('viewerCards').innerHTML = D.viewIds.map(function (id) { return GL.ResultCard.html(D.subs[id], { meta: true, summary: true }); }).join('');
     u.$('cmpBtn').textContent = D.viewIds.length > 1 ? '한 명만 보기' : '나란히 비교';
 
     var strip = u.$('pickStrip');

@@ -1,7 +1,11 @@
 /* =========================================================
-   student-report.js — 20년 후 리포트 (아이 프로필 + 2065 뉴스)
+   student-report.js — 20년 후 리포트
+   왼쪽: 아이 프로필 + 유전자별 인생 이야기 (2개는 펼침, 나머지는 눌러서)
+   오른쪽: 2065년 뉴스 + 20년의 종합 해설
    ========================================================= */
 GL.Report = {
+  OPEN_COUNT: 2,
+
   show: function () {
     var u = GL.util;
     var S = GL.state;
@@ -10,33 +14,42 @@ GL.Report = {
     // 프로필 요약 줄
     var sum;
     if (s.total === 0) {
-      sum = S.level === 2 ? '우리 집 예산으로는 살 수 있는 옵션이 하나도 없었어요.' : '';
+      sum = '';
     } else {
       sum = s.total + '개를 편집했어요. 사용한 돈 ' + u.money(S.spent) + '.';
     }
     u.$('profLine').textContent = GL.STORY.profileLine(s);
     u.$('profSummary').textContent = sum;
 
-    var list = u.$('profPicks');
-    if (!S.results.length) {
-      list.innerHTML = '';
-    } else {
-      list.innerHTML = S.results.map(function (p) {
-        var o = GL.optById[p.id];
-        var st = GL.sim.STATUS[p.status];
-        return '<li class="rc-pick ' + st.cls + '"><span class="rc-mark">' + st.mark + '</span>' +
-          '<span class="rc-pname">' + u.esc(o.name) + '</span>' +
-          '<span class="st-label">' + st.label + '</span>' +
-          (p.status === 'side' ? '<span class="rc-side">' + u.esc(GL.sim.sideText(o)) + '</span>' : '') +
-          '</li>';
-      }).join('');
-    }
+    // 유전자별 인생 이야기 — 의미가 큰 순서(변화 > 효과 없음 > 향상 > 경계 > 치료)
+    var rank = function (p) {
+      var o = GL.optById[p.id];
+      var b = p.status === 'side' ? 5 : p.status === 'none' ? 4 : (o.tag === 'enhance' ? 3 : o.tag === 'border' ? 2 : 1);
+      return b * 1000000 + o.price;
+    };
+    var sorted = S.results.slice().sort(function (a, b) { return rank(b) - rank(a); });
+    u.$('profPicks').innerHTML = sorted.map(function (p, i) {
+      var o = GL.optById[p.id];
+      var st = GL.sim.STATUS[p.status];
+      var story = (GL.LIFE[o.id] || {})[p.status] || '';
+      return '<li><details class="story ' + st.cls + '"' + (i < GL.Report.OPEN_COUNT ? ' open' : '') + '>' +
+        '<summary><span class="rc-mark">' + st.mark + '</span><span class="rc-pname">' + u.esc(o.name) + '</span>' +
+        '<span class="st-label">' + st.label + '</span><span class="chev">▾</span></summary>' +
+        '<p>' + u.esc(story) + '</p></details></li>';
+    }).join('');
+    u.$('moreHint').classList.toggle('hidden', sorted.length <= GL.Report.OPEN_COUNT);
 
     // 뉴스 4개
     var months = ['03', '05', '08', '11'];
     u.$('newsList').innerHTML = GL.STORY.pickNews(s).map(function (n, i) {
       return '<li class="news news-' + n.tone + '"><span class="news-meta mono">2065.' + months[i] + ' · ' + n.sec + '</span>' +
         '<span class="news-t">' + u.esc(n.t) + '</span></li>';
+    }).join('');
+
+    // 20년의 종합 해설
+    var paras = GL.LIFE_SUMMARY({ level: S.level, spent: S.spent, earned: S.earned, picks: S.results });
+    u.$('lifeSummary').innerHTML = paras.map(function (p, i) {
+      return '<p' + (i === paras.length - 1 ? ' class="sum-q"' : '') + '>' + u.esc(p) + '</p>';
     }).join('');
 
     u.$('toLetterBtn').onclick = GL.Letter.show;

@@ -11,6 +11,8 @@ GL.newState = function () {
     voucherId: null,  // L1 국가 지원으로 무료 처리된 옵션 id
     results: [],      // 탄생 후 [{id, status}] — 한 번 정해지면 바뀌지 않음
     spent: 0,         // 탄생 때 확정된 사용 금액
+    earned: 0,        // 아르바이트(퀴즈)로 번 돈 (만 원)
+    job: null,        // 아르바이트 진행 상황 { order:[문제id], done:{문제id: 맞힘여부} }
     answers: { q1: '', q2: '', q3: '', q4: '', q3choice: '' },
     submitted: false, count: 0,
     startedAt: 0, screen: 'scr-login'
@@ -71,6 +73,7 @@ GL.App = {
       '<ol class="help-list">' +
       '<li>학번을 넣으면 우리 집의 <b>형편 카드</b>를 받아요. 카드는 무작위이고 바꿀 수 없어요.</li>' +
       '<li>예산 안에서 아기에게 넣을 <b>유전자</b>를 골라요. 카드를 누르면 자세한 설명이 나와요.</li>' +
+      '<li>돈이 모자라면 <b>아르바이트</b>를 해요. 퀴즈를 맞힐 때마다 ' + GL.util.money(GL.JOB.PAY) + '을 벌고, 한 문제는 한 번만 풀 수 있어요.</li>' +
       '<li><b>아이 탄생시키기</b>를 누르면 20년 뒤로 이동해요. 편집이 항상 성공하는 건 아니고, 쇼핑은 한 번만 할 수 있어요.</li>' +
       '<li>아이의 편지를 읽고 질문에 답한 뒤 제출해요. 제출한 뒤에도 답변은 고칠 수 있어요.</li>' +
       '</ol>' +
@@ -84,11 +87,12 @@ GL.App = {
   record: function () {
     var S = GL.state;
     var s = GL.sim.summarize(S.results);
+    var letter = GL.LETTER.compose({ level: S.level, earned: S.earned, spent: S.spent, picks: S.results });
     return {
       id: S.id, name: S.name, clsLabel: S.clsLabel, level: S.level,
-      budget: S.budget, spent: S.spent,
+      budget: S.budget, spent: S.spent, earned: S.earned,
       total: s.total, treat: s.treat, border: s.border, enhance: s.enhance, side: s.side,
-      picks: S.results, letterType: GL.STORY.pickLetter(s).type,
+      picks: S.results, letterType: letter.type,
       q1: S.answers.q1, q2: S.answers.q2, q3choice: S.answers.q3choice, q3: S.answers.q3, q4: S.answers.q4,
       elapsed: Math.round((Date.now() - S.startedAt) / 1000)
     };
@@ -96,7 +100,7 @@ GL.App = {
 
   /* ---------- 제출 완료 화면 ---------- */
   showDone: function () {
-    GL.util.$('doneCard').innerHTML = GL.ResultCard.html(GL.App.record());
+    GL.util.$('doneCard').innerHTML = GL.ResultCard.html(GL.App.record(), { summary: true });
     GL.App.show('scr-done', 0, 2065);
   },
 

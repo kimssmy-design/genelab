@@ -15,7 +15,7 @@ var SH_SUB = '제출데이터';
 var CARD_HEADER = ['학번', '이름', '반', '단계', '배정일시'];
 var SUB_HEADER = ['학번', '이름', '반', '단계', '예산(만원)', '사용금액(만원)', '편집수', '치료', '경계', '향상',
   '의도치않은변화', '선택결과(JSON)', '편지유형', 'Q1 좋은점', 'Q2 문제점', 'Q3 선택', 'Q3 이유', 'Q4 답장',
-  '소요시간(초)', '제출횟수', '최종제출일시'];
+  '소요시간(초)', '제출횟수', '최종제출일시', '번 돈(만원)'];
 
 /* ---------- 라우터 ---------- */
 function doGet(e) {
@@ -152,7 +152,8 @@ function handleSubmit(params) {
       Number(params.enhance) || 0, Number(params.side) || 0,
       JSON.stringify(params.picks || []), clean_(params.letterType),
       clean_(params.q1), clean_(params.q2), clean_(params.q3choice), clean_(params.q3), clean_(params.q4),
-      Number(params.elapsed) || 0, count + 1, now_()
+      Number(params.elapsed) || 0, count + 1, now_(),
+      Number(params.earned) || 0
     ];
 
     // 쇼핑은 1회만: 이미 제출한 학생이면 예산~편지유형(5~13열)·소요시간(19열)은 첫 제출 값 유지
@@ -160,6 +161,7 @@ function handleSubmit(params) {
       var old = data[rowIdx - 1];
       for (var k = 4; k <= 12; k++) row[k] = old[k];
       row[18] = old[18];
+      row[21] = old[21] === '' || old[21] == null ? row[21] : old[21];   // 번 돈도 첫 제출 값 유지
     }
 
     if (rowIdx < 0) rowIdx = sh.getLastRow() + 1;
@@ -209,7 +211,8 @@ function rowToSub_(d) {
     picks: picks, letterType: String(d[12]),
     q1: String(d[13]), q2: String(d[14]), q3choice: String(d[15]), q3: String(d[16]), q4: String(d[17]),
     elapsed: Number(d[18]), count: Number(d[19]),
-    time: (d[20] instanceof Date) ? Utilities.formatDate(d[20], 'Asia/Seoul', 'MM-dd HH:mm') : String(d[20])
+    time: (d[20] instanceof Date) ? Utilities.formatDate(d[20], 'Asia/Seoul', 'MM-dd HH:mm') : String(d[20]),
+    earned: Number(d[21]) || 0
   };
 }
 
@@ -242,6 +245,9 @@ function getSheet_(ss, name, header) {
   if (sh.getLastRow() === 0) {
     sh.getRange(1, 1, 1, header.length).setValues([header]).setFontWeight('bold');
     sh.setFrozenRows(1);
+  } else if (sh.getLastColumn() < header.length) {
+    // 새 칸(예: 번 돈)이 추가된 경우 제목 줄만 다시 씀
+    sh.getRange(1, 1, 1, header.length).setValues([header]).setFontWeight('bold');
   }
   return sh;
 }

@@ -50,8 +50,10 @@ GL.Letter = {
   show: function () {
     var u = GL.util;
     var S = GL.state;
-    var s = GL.sim.summarize(S.results);
-    u.$('letterText').textContent = GL.STORY.pickLetter(s).text;
+    var letter = GL.LETTER.compose({ level: S.level, earned: S.earned, spent: S.spent, picks: S.results });
+    u.$('letterText').innerHTML = letter.paras.map(function (p, i) {
+      return '<p' + (i === letter.paras.length - 1 ? ' class="letter-q"' : '') + '>' + u.esc(p) + '</p>';
+    }).join('');
 
     if (!u.$('qForm').dataset.built) GL.Letter.build();
     GL.STORY.QUESTIONS.forEach(function (q) {

@@ -46,6 +46,7 @@
 .seg-border { background: var(--border); }
 .seg-enh { background: var(--enh); }
 .seg-ban { background: var(--ink); }
+.seg-earn { background: var(--treat); }
 .stat-total { border-top: 1px solid var(--line-strong) !important; margin-top: 4px; }
 
 .money-row { grid-template-columns: 150px minmax(0, 1fr) auto 64px; }
