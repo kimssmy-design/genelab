@@ -241,6 +241,20 @@ GL.LETTER = {
     treat: '아프지 않게 해 줘서 고마워요. 정말로요. 그런데 고마운 만큼, 같은 병을 안고 사는 사람들 앞에서 저는 자꾸 작아져요.'
   },
 
+  // 대출을 받았을 때 들어가는 빚 이야기
+  debt: function (rec, loan) {
+    var money = GL.util.money;
+    var monthly = GL.POLICY.monthlyWon(loan).toLocaleString('ko-KR');
+    var repay = money(GL.POLICY.repay(loan));
+    if (rec.level <= 2) {
+      return '그리고 저, 알아요. 엄마 아빠가 은행에서 ' + money(loan) + '을 빌렸다는 거요. 제가 스무 살이 될 때까지 매달 ' + monthly +
+        '원씩, 모두 ' + repay + '을 갚았다는 것도요. 아빠가 새 신발 대신 밑창을 붙여 신던 이유를 저는 고등학생이 되어서야 알았어요. ' +
+        '그 돈이 제 몸 어딘가에 들어 있다고 생각하면, 가끔은 숨쉬는 것도 무거워요.';
+    }
+    return '엄마 아빠가 그것도 모자라 은행에서 ' + money(loan) + '을 더 빌렸다는 걸 얼마 전에 알았어요. 매달 ' + monthly +
+      '원씩 20년 동안 갚았다고 했죠. 우리 집은 충분히 넉넉했는데, 왜 빚까지 내야 했을까요. 그만큼 저를 "더" 만들고 싶었던 걸까요?';
+  },
+
   // 편지에서 이야기할 '핵심 유전자' 고르기
   pickCore: function (picks) {
     var rank = function (p) {
@@ -259,7 +273,8 @@ GL.LETTER = {
     var picks = rec.picks || [];
     var s = GL.sim.summarize(picks);
     var base = GL.LEVELS[rec.level] ? GL.LEVELS[rec.level].budget : 0;
-    var have = base + (Number(rec.earned) || 0);
+    var loan = Number(rec.loan) || 0;
+    var have = base - (Number(rec.tax) || 0) + (Number(rec.support) || 0) + (Number(rec.earned) || 0) + loan;
     var minPrice = Math.min.apply(null, GL.OPTIONS.map(function (o) { return o.price; }));
 
     /* 편집을 하나도 안 한 경우 */
@@ -268,7 +283,8 @@ GL.LETTER = {
         return { type: '편집없음(고를 수 없음)', paras: [
           '오늘 면접에서 "편집 안 하셨네요?"라는 질문을 받았어요. 면접관은 아무렇지 않게 물었는데, 저는 대답을 하지 못했어요.',
           '어릴 때 엄마가 병원 상담실에서 가격표를 한참 들여다보다가 조용히 접어 가방에 넣던 장면이 기억나요. 그때는 그게 뭔지 몰랐어요. 나중에 알았어요. 우리 집은 나라의 도움을 받기엔 조금 넉넉했고, 편집을 하기엔 한참 모자랐다는 걸요.' +
-            (rec.earned > 0 ? ' 아빠가 주말마다 일을 더 했다는 것도, 그래도 닿지 않았다는 것도요.' : ''),
+            (rec.earned > 0 ? ' 아빠가 주말마다 일을 더 했다는 것도, 그래도 닿지 않았다는 것도요.' : '') +
+            (rec.supportStatus === '탈락' ? ' 나라에 지원을 신청했다가 "기준보다 조금 넉넉하다"는 답을 받았다는 것도요.' : ''),
           '원망하지 않아요. 진짜로요. 엄마 아빠는 가진 걸 전부 저한테 줬어요.',
           '그런데 왜 저는, 아무것도 잘못하지 않았는데 모자란 사람이 된 것 같을까요?'
         ] };
@@ -297,6 +313,7 @@ GL.LETTER = {
 
     var bridgeKey = core.status === 'side' ? 'side' : core.status === 'none' ? 'none' : coreOpt.tag;
     paras.push(GL.LETTER.BRIDGE[bridgeKey]);
+    if (loan > 0) paras.push(GL.LETTER.debt(rec, loan));
 
     var hasPersonality = GL.PERSONALITY_IDS.some(function (id) { return s.ids[id]; });
     var noneN = picks.filter(function (p) { return p.status === 'none'; }).length;

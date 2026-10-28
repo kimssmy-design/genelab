@@ -50,7 +50,7 @@ GL.Letter = {
   show: function () {
     var u = GL.util;
     var S = GL.state;
-    var letter = GL.LETTER.compose({ level: S.level, earned: S.earned, spent: S.spent, picks: S.results });
+    var letter = GL.LETTER.compose(GL.App.moneyRec());
     u.$('letterText').innerHTML = letter.paras.map(function (p, i) {
       return '<p' + (i === letter.paras.length - 1 ? ' class="letter-q"' : '') + '>' + u.esc(p) + '</p>';
     }).join('');

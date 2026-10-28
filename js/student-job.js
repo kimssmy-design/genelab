@@ -45,9 +45,7 @@ GL.Job = {
       btn.disabled = false;
       btn.innerHTML = GL.Job.ICON + (n ? '다시 출근하기' : '아르바이트 하기') + ' <span class="mono muted">' + n + '/' + total + '</span>';
     }
-    var e = u.$('earnedLine');
-    e.classList.toggle('hidden', !S.earned);
-    e.textContent = '아르바이트로 번 돈 +' + u.money(S.earned);
+    // 번 돈은 예산 내역(student-money.js)에 표시돼요
   },
 
   ICON: '<svg class="job-ic" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="5" width="12" height="8" rx="1.5"/><path d="M6 5V3.5h4V5"/></svg>',

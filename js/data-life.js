@@ -256,26 +256,52 @@ GL.LIFE_SUMMARY = function (rec) {
   });
   var noneN = picks.filter(function (p) { return p.status === 'none'; }).length;
   var hasPersonality = GL.PERSONALITY_IDS.some(function (id) { return s.ids[id]; });
-  var have = base + earned;
+  var tax = Number(rec.tax) || 0;
+  var support = Number(rec.support) || 0;
+  var loan = Number(rec.loan) || 0;
+  var have = base - tax + support + earned + loan;
   var minPrice = Math.min.apply(null, GL.OPTIONS.map(function (o) { return o.price; }));
-  var haveLine = earned > 0
-    ? '원래 예산 ' + money(base) + '에 부모가 아르바이트로 번 ' + money(earned) + '을 더해 ' + money(have) + '이 있었어요.'
-    : '부모에게 주어진 돈은 ' + money(base) + '이었어요.';
+
+  // 쓸 수 있었던 돈이 어떻게 모였는지 (세금·지원·아르바이트·대출)
+  var adds = [];
+  if (tax) adds.push('우리 사회가 정한 세금으로 ' + money(tax) + '을 냈고');
+  if (support) adds.push('나라에서 ' + money(support) + '을 지원받았고');
+  if (earned) adds.push('아르바이트로 ' + money(earned) + '을 벌었고');
+  if (loan) adds.push('은행에서 ' + money(loan) + '을 빌렸고');
+  var haveLine = '부모에게 주어진 돈은 ' + money(base) + '이었어요.';
+  if (adds.length) {
+    haveLine += ' ' + adds.join(', ').replace(/고$/, '') + '어요. 그래서 쓸 수 있는 돈은 ' + money(have) + '이었어요.';
+  }
+  var loanLine = loan
+    ? ' 빌린 ' + money(loan) + ' 때문에 부모는 아이가 스무 살이 될 때까지 매달 약 ' +
+      GL.POLICY.monthlyWon(loan).toLocaleString('ko-KR') + '원씩, 모두 ' + money(GL.POLICY.repay(loan)) + '을 갚았어요.'
+    : '';
 
   /* ---- 1. 돈의 흐름 ---- */
   var p1;
   if (s.total === 0 && have < minPrice) {
     p1 = haveLine + ' 가장 싼 치료도 ' + money(minPrice) + '이었어요. 이 집은 유전자를 "고르지 않은" 게 아니라 "고를 수 없었어요".' +
-      (rec.level === 2 ? ' 국가 지원의 기준선보다 조금 위에 있었다는 이유로요.' : '');
+      (rec.level === 2
+        ? (rec.supportStatus === '탈락'
+          ? ' 국가 지원을 신청했지만, 소득이 기준선보다 조금 높다는 이유로 탈락했어요.'
+          : ' 국가 지원의 기준선보다 조금 위에 있었다는 이유로요.')
+        : '');
   } else if (s.total === 0) {
-    p1 = haveLine + ' 고를 수 있는 돈이 있었지만, 부모는 아무것도 고르지 않았어요. 이 아이는 부모에게서 받은 그대로의 유전자로 태어났어요.';
+    p1 = haveLine + ' 고를 수 있는 돈이 있었지만, 부모는 아무것도 고르지 않았어요. 이 아이는 부모에게서 받은 그대로의 유전자로 태어났어요.' + loanLine;
   } else if (rec.level === 1 && s.total === 1 && freeUsed) {
     p1 = '이 집에 허락된 선택은 국가가 지원한 치료 하나뿐이었어요.' +
       (earned > 0 ? ' 부모가 아르바이트로 ' + money(earned) + '을 벌었지만 더 고를 수 있는 건 없었어요.' : '') +
       ' 고를 수 있는 것이 하나뿐일 때, 부모는 가장 꼭 필요한 것을 골랐어요.';
   } else {
     p1 = haveLine + (rec.spent >= have ? ' 부모는 그 돈을 모두 썼어요.' : ' 그중 ' + money(rec.spent) + '을 썼어요.');
-    if (earned > 0 && base < minPrice) p1 += ' 원래 예산으로는 아무것도 살 수 없었으니, 이 아이가 받은 편집은 모두 부모가 일해서 번 돈으로 산 것이에요.';
+    if (base < minPrice && (earned || loan || support)) {
+      var src = [];
+      if (earned) src.push('부모가 일해서 번 돈');
+      if (loan) src.push('빌린 돈');
+      if (support) src.push('나라의 지원');
+      p1 += ' 원래 예산으로는 아무것도 살 수 없었으니, 이 아이가 받은 편집은 모두 ' + (src.length > 1 ? src.slice(0, -1).join(', ') + '과 ' + src[src.length - 1] : src[0]) + '으로 산 것이에요.';
+    }
+    p1 += loanLine;
     if (noneM > 0) p1 += ' ' + money(noneM) + '은 아무 효과가 없었어요.';
     if (sideM > 0) p1 += ' ' + money(sideM) + '은 예상하지 못한 변화를 남겼어요.';
     if ((noneM > 0 || sideM > 0) && treatOkM > 0) {

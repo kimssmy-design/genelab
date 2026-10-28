@@ -53,6 +53,11 @@ GL.Login = {
       S.picks = S.results.map(function (p) { return p.id; });
       S.spent = Number(sub.spent) || 0;
       S.earned = Number(sub.earned) || 0;
+      S.rate = Number(sub.rate) || 0;
+      S.tax = Number(sub.tax) || 0;
+      S.support = Number(sub.support) || 0;
+      S.supportStatus = sub.supportStatus || '미신청';
+      S.loan = Number(sub.loan) || 0;
       S.answers = { q1: sub.q1, q2: sub.q2, q3: sub.q3, q4: sub.q4, q3choice: sub.q3choice };
       S.submitted = true;
       S.count = Number(sub.count) || 1;
@@ -60,7 +65,12 @@ GL.Login = {
       GL.App.toast('이미 제출한 기록을 불러왔어요');
       return;
     }
-    GL.Card.show();
+
+    // 세율 투표: 마감됐으면 바로 카드, 이미 투표했으면 기다리기, 아니면 투표
+    var v = res.vote || {};
+    if (v.closed) { GL.Vote.applyRate(v.rate); GL.Card.show(); }
+    else if (v.myVote !== null && v.myVote !== undefined) GL.Vote.wait();
+    else GL.Vote.show();
   }
 };
 
@@ -73,6 +83,12 @@ GL.Card = {
     GL.util.$('cardName').textContent = lv.name;
     GL.util.$('cardBudget').textContent = GL.util.money(lv.budget);
     GL.util.$('cardNote').textContent = lv.note;
+
+    // 우리 반 세율에 따른 세금 (지원금은 쇼핑 화면에서 신청해야 받음)
+    var taxLine = '';
+    if (S.tax) taxLine = '세금 −' + GL.util.money(S.tax) + ' (세율 ' + S.rate + '%)';
+    else if (GL.POLICY.support(S.rate || 0, S.level) > 0) taxLine = '국가 지원 신청 가능';
+    GL.util.$('cardTax').textContent = taxLine;
 
     var flip = GL.util.$('flip');
     flip.classList.remove('flipped');

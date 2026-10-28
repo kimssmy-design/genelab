@@ -226,6 +226,52 @@ main { height: calc(100dvh - 52px - env(safe-area-inset-top, 0px)); }
 .letter-text p { margin: 0 0 14px; }
 .letter-text .letter-q { font-weight: 700; margin-top: 18px; }
 
+/* ---------- 세율 투표·기다리기 ---------- */
+.vote-wrap { margin: auto; width: min(760px, 92%); padding: 24px 0; overflow-y: auto; }
+.vote-wrap.center { text-align: center; width: min(520px, 92%); }
+.vote-wrap .lead { word-break: keep-all; }
+.vote-opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 8px 0 4px; }
+.vote-opt {
+  text-align: left; background: var(--paper); border: 1px solid var(--line-strong); border-radius: 12px;
+  padding: 16px; display: flex; flex-direction: column; gap: 6px;
+}
+.vote-opt.on { border: 2px solid var(--ink); padding: 15px; }
+.vote-rate { font-size: 28px; font-weight: 500; letter-spacing: -0.02em; }
+.vote-name { font-weight: 700; }
+.vote-desc { font-size: 14px; color: var(--muted); line-height: 1.55; word-break: keep-all; }
+#voteBtn, #waitBtn { margin-top: 8px; }
+.wait-spin {
+  display: inline-block; width: 28px; height: 28px; border-radius: 50%; margin-bottom: 10px;
+  border: 3px solid var(--line); border-top-color: var(--ink); animation: spin .9s linear infinite;
+}
+#waitMine { word-break: keep-all; }
+.wait-result { display: grid; gap: 8px; margin: 16px auto; max-width: 360px; text-align: left; }
+.vr-row { display: grid; grid-template-columns: 44px 1fr 40px; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+.vr-row.win { color: var(--ink); font-weight: 700; }
+.vr-bar { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; }
+.vr-bar span { display: block; height: 100%; background: var(--line-strong); }
+.vr-row.win .vr-bar span { background: var(--ink); }
+
+/* ---------- 카드의 세금 줄 ---------- */
+.card-tax { font-size: 12px; margin: 0; color: var(--danger); min-height: 1em; }
+
+/* ---------- 쇼핑 패널: 예산 내역·돈 버튼 ---------- */
+.money-rows { display: grid; gap: 2px; margin-top: 4px; font-size: 12px; }
+.mrow { display: flex; justify-content: space-between; color: var(--muted); }
+.mrow.plus { color: var(--treat); }
+.mrow.minus { color: var(--danger); }
+.mrow.loan { color: var(--enh); }
+.money-actions { display: grid; gap: 6px; }
+.money-actions .btn { min-height: 38px; font-size: 14px; justify-content: space-between; }
+.money-actions .btn:disabled { opacity: .6; }
+
+/* 대출 창 */
+.loan-row { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: 14px; }
+.loan-row.big { font-size: 17px; font-weight: 700; border-top: 1px solid var(--line); margin-top: 6px; padding-top: 10px; }
+.loan-row.minus { color: var(--danger); }
+.loan-ctrl { display: grid; grid-template-columns: 44px 1fr 44px; gap: 8px; align-items: center; margin: 10px 0 4px; }
+.loan-ctrl input { width: 100%; accent-color: var(--ink); }
+
 /* =========================================================
    세로 모드 (태블릿 세로·폰)
    ========================================================= */
@@ -251,6 +297,12 @@ main { height: calc(100dvh - 52px - env(safe-area-inset-top, 0px)); }
 
   .opt-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .two-col { grid-template-columns: 1fr; }
+  .vote-opts { grid-template-columns: 1fr; }
+  .money-actions { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .money-actions .btn { font-size: 12px; padding: 0 8px; justify-content: center; }
+  .money-actions .btn-job { grid-column: auto; min-height: 36px; }
+  .money-actions .job-ic { display: none; }
+  .money-actions .btn .mono { display: none; }
   .letter { position: static; }
 }
 @media (max-width: 480px) {
@@ -264,6 +316,8 @@ main { height: calc(100dvh - 52px - env(safe-area-inset-top, 0px)); }
   /* 폰: 남은 예산과 탄생 버튼을 한 줄로, 분류 탭은 옆으로 밀기 */
   .shop-panel { padding: 10px 14px; gap: 6px 10px; }
   .panel-money > .small:first-child, #spentLine { display: none; }
+  .money-rows { display: none; }
+  .shop-panel.open .money-rows { display: grid; }
   .remain { font-size: 20px; }
   .panel-money .bar { margin: 2px 0; }
   #birthBtn { min-height: 40px; padding: 0 14px; font-size: 14px; }

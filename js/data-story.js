@@ -44,6 +44,23 @@ GL.STORY.NEWS = {
     { t: '부유층 "편집 패키지" 해외 원정 성행… 1인 10억 원대', sec: '사회', tone: 'bad' },
     { t: '"부모 잘 만난 유전자"… 편집 세대 자녀들 "우리도 불행하다" 호소', sec: '사회', tone: 'warn' }
   ],
+  // ③ 우리 반이 정한 세율에 따른 사회 뉴스
+  rate: {
+    0:  [{ t: '"유전자 복지세" 도입 또 무산… "각자 능력껏" 원칙 유지', sec: '정치', tone: 'bad' },
+         { t: '편집 격차 20년 새 3배로… "세금 없는 자유 시장의 결과"', sec: '경제', tone: 'bad' }],
+    10: [{ t: '유전자 복지세 10% 시행 20년… "격차는 줄었지만 사각지대 여전"', sec: '정치', tone: 'warn' },
+         { t: '부유층 "세금 아까워" 해외 원정 편집 늘어', sec: '사회', tone: 'warn' }],
+    30: [{ t: '유전자 복지세 30% 시행 20년… 편집 격차 절반으로 줄어', sec: '정치', tone: 'good' },
+         { t: '"내 세금으로 남의 아이 편집?" 중산층 조세 저항 시위', sec: '사회', tone: 'warn' }]
+  },
+  // ② 대출·지원 탈락에 따른 뉴스
+  loan: [
+    { t: '"편집 대출" 20년 상환 가구 100만 돌파… 청년 부모 빚 대물림', sec: '경제', tone: 'bad' },
+    { t: '은행들, 소득 따라 "편집 대출" 한도 차등… "가난할수록 덜 빌려준다"', sec: '경제', tone: 'bad' }
+  ],
+  rejected: [
+    { t: '"덜 가난해서 탈락"… 차상위 가구 지원 기준 완화 청원 10만 명 넘어', sec: '정치', tone: 'bad' }
+  ],
   // ② 편집 결과에 따른 뉴스
   side: [
     { t: '"편집 실패 아동" 첫 집단 소송 제기', sec: '사회', tone: 'warn' },
@@ -109,7 +126,8 @@ GL.STORY.NEWS = {
   }
 };
 
-GL.STORY.pickNews = function (s, level) {
+GL.STORY.pickNews = function (s, level, extra) {
+  extra = extra || {};
   var N = GL.STORY.NEWS;
   function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function shuffle(arr) {
@@ -133,6 +151,8 @@ GL.STORY.pickNews = function (s, level) {
   if (s.none > 0) outcome = outcome.concat(N.none);
   if (s.total === 0) outcome = outcome.concat(N.zero);
   var lvNews = level <= 2 ? N.low : level >= 4 ? N.high : [];
+  if (extra.loan > 0) lvNews = lvNews.concat(N.loan);
+  if (extra.supportStatus === '탈락' && level === 2) lvNews = lvNews.concat(N.rejected);
 
   // 의도하지 않은 변화·편집 없음은 꼭 한 개 넣고, '효과 없음' 뉴스는 반반 확률로 넣음
   // 나머지는 고른 유전자·형편 뉴스에서 무작위
@@ -145,8 +165,10 @@ GL.STORY.pickNews = function (s, level) {
   var socialPool = shuffle(N.social);
   while (picked.length < 2) picked.push(socialPool.pop());
 
-  // ③ 사회 전체 뉴스 1개 (겹치지 않게)
-  var social = socialPool.filter(function (n) { return picked.indexOf(n) < 0; })[0];
+  // ③ 사회 전체 뉴스 1개 — 우리 반이 정한 세율 뉴스를 우선 (겹치지 않게)
+  var ratePool = N.rate[extra.rate] || [];
+  var social = ratePool.length && Math.random() < 0.7 ? rand(ratePool)
+    : socialPool.filter(function (n) { return picked.indexOf(n) < 0; })[0];
   out = out.concat(picked, [social]);
 
   // 날짜: 서로 다른 달 4개를 골라 순서대로

@@ -6,6 +6,19 @@
    opts.summary = true 이면 종합 해설 첫 문단 표시 (data-life.js 필요)
    ========================================================= */
 GL.ResultCard = {
+  // 예산 1억 − 세금 1,000만 + 지원 500만 + 알바 40만 + 대출 300만 · 사용 9,300만
+  moneyLine: function (rec) {
+    var m = function (v) { return GL.util.money(v).replace(' 원', ''); };
+    var t = '예산 ' + m(rec.budget);
+    if (rec.tax) t += ' − 세금 ' + m(rec.tax);
+    if (rec.support) t += ' + 지원 ' + m(rec.support);
+    if (rec.earned) t += ' + 알바 ' + m(rec.earned);
+    if (rec.loan) t += ' + 대출 ' + m(rec.loan);
+    t += ' · 사용 ' + m(rec.spent);
+    if (rec.supportStatus === '탈락') t += ' · 지원 탈락';
+    return t;
+  },
+
   html: function (rec, opts) {
     opts = opts || {};
     var u = GL.util;
@@ -36,8 +49,7 @@ GL.ResultCard = {
           '<div><span class="rc-num mono">' + u.esc(num) + '번</span> <span class="rc-name">' + u.esc(rec.name) + '</span></div>' +
           '<span class="lv-chip lv' + rec.level + '">L' + rec.level + ' ' + u.esc(lv.short) + '</span>' +
         '</header>' +
-        '<div class="rc-money mono">예산 ' + u.money(rec.budget) +
-          (rec.earned ? ' + 알바 ' + u.money(rec.earned) : '') + ' · 사용 ' + u.money(rec.spent) + '</div>' +
+        '<div class="rc-money mono">' + GL.ResultCard.moneyLine(rec) + '</div>' +
         (opts.meta ? '<div class="rc-meta mono' + (rec.count > 1 ? ' multi' : '') + '">제출 ' + (rec.count || 1) + '회' +
           (rec.time ? ' · 마지막 ' + u.esc(rec.time) : '') + '</div>' : '') +
         '<div class="rc-counts">' +

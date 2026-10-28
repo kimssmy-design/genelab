@@ -41,7 +41,7 @@ GL.Report = {
 
     // 뉴스 4개 — 처음 볼 때 한 번 고르고 저장 (새로고침해도 그대로)
     if (!S.news || !S.news.length) {
-      S.news = GL.STORY.pickNews(s, S.level);
+      S.news = GL.STORY.pickNews(s, S.level, { rate: S.rate || 0, loan: S.loan, supportStatus: S.supportStatus });
       GL.App.save();
     }
     u.$('newsList').innerHTML = S.news.map(function (n) {
@@ -50,7 +50,7 @@ GL.Report = {
     }).join('');
 
     // 20년의 종합 해설
-    var paras = GL.LIFE_SUMMARY({ level: S.level, spent: S.spent, earned: S.earned, picks: S.results });
+    var paras = GL.LIFE_SUMMARY(GL.App.moneyRec());
     u.$('lifeSummary').innerHTML = paras.map(function (p, i) {
       return '<p' + (i === paras.length - 1 ? ' class="sum-q"' : '') + '>' + u.esc(p) + '</p>';
     }).join('');

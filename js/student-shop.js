@@ -20,8 +20,8 @@ GL.Shop = {
     return GL.state.picks.reduce(function (sum, id) { return sum + GL.Shop.priceOf(GL.optById[id]); }, 0);
   },
 
-  // 쓸 수 있는 돈 = 형편 카드 예산 + 아르바이트로 번 돈
-  total: function () { return GL.state.budget + (GL.state.earned || 0); },
+  // 쓸 수 있는 돈 = 기본 예산 − 세금 + 국가 지원 + 아르바이트 + 대출 (student-money.js)
+  total: function () { return GL.Money.total(); },
   remaining: function () { return GL.Shop.total() - GL.Shop.spent(); },
 
   // 고를 수 있는지 + 못 고르는 이유
@@ -62,6 +62,8 @@ GL.Shop = {
     GL.Shop.render();
     GL.util.$('birthBtn').onclick = GL.Shop.birthConfirm;
     GL.util.$('jobBtn').onclick = GL.Job.open;
+    GL.util.$('supportBtn').onclick = GL.Money.applySupport;
+    GL.util.$('loanBtn').onclick = GL.Money.openLoan;
     GL.util.$('cartToggle').onclick = function () {
       GL.util.$('shopPanel').classList.toggle('open');
     };
@@ -127,8 +129,8 @@ GL.Shop = {
     if (any) { b.classList.add('hidden'); return; }
     b.classList.remove('hidden');
     b.textContent = GL.state.picks.length
-      ? '남은 예산으로 더 고를 수 있는 유전자가 없어요. 왼쪽의 아르바이트로 돈을 더 벌 수 있어요.'
-      : '우리 집 예산으로는 고를 수 있는 유전자가 없어요. 왼쪽의 아르바이트로 돈을 벌 수 있어요.';
+      ? '남은 예산으로 더 고를 수 있는 유전자가 없어요. 아르바이트·국가 지원·대출로 돈을 더 마련할 수 있어요.'
+      : '우리 집 예산으로는 고를 수 있는 유전자가 없어요. 아르바이트·국가 지원·대출로 돈을 마련할 수 있어요.';
   },
 
   renderPanel: function () {
@@ -151,6 +153,7 @@ GL.Shop = {
     }
 
     GL.Job.renderPanel();
+    GL.Money.renderBreakdown();
     u.$('cartCount').textContent = S.picks.length;
     var cart = u.$('cartList');
     if (!S.picks.length) {

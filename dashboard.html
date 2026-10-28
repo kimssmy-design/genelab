@@ -48,6 +48,11 @@
 
 <div class="dash" id="viewStats">
   <section class="stats">
+    <div class="stat-block vote-block">
+      <div class="stat-head"><h3>우리 반 세율 투표</h3><span class="muted small" id="voteState"></span></div>
+      <div id="statVote"></div>
+      <div class="vote-actions" id="voteActions"></div>
+    </div>
     <div class="stat-block">
       <div class="stat-head">
         <h3>형편 단계별 평균 편집 개수</h3>
@@ -62,6 +67,10 @@
     <div class="stat-block">
       <div class="stat-head"><h3>형편 단계별 아르바이트로 번 돈</h3><span class="muted small">한 문제 10만 원, 최대 500만 원</span></div>
       <div id="statEarn"></div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-head"><h3>형편 단계별 평균 대출액</h3><span class="muted small">국가 지원 신청 탈락</span></div>
+      <div id="statLoan"></div>
     </div>
     <div class="stat-block">
       <div class="stat-head">
@@ -110,6 +119,7 @@
 <script src="js/config.js"></script>
 <script src="js/util.js"></script>
 <script src="js/data-options.js"></script>
+<script src="js/data-policy.js"></script>
 <script src="js/simulate.js"></script>
 <script src="js/data-life.js"></script>
 <script src="js/api.js"></script>

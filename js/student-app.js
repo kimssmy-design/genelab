@@ -9,10 +9,15 @@ GL.newState = function () {
     id: '', name: '', clsLabel: '', level: 0, budget: 0,
     picks: [],        // 고른 옵션 id (고른 순서대로)
     voucherId: null,  // L1 국가 지원으로 무료 처리된 옵션 id
-    results: [],
-    news: [],         // 20년 후 뉴스 4개 (처음 볼 때 고르고 저장)      // 탄생 후 [{id, status}] — 한 번 정해지면 바뀌지 않음
+    results: [],      // 탄생 후 [{id, status}] — 한 번 정해지면 바뀌지 않음
+    news: [],         // 20년 후 뉴스 4개 (처음 볼 때 고르고 저장)
     spent: 0,         // 탄생 때 확정된 사용 금액
     earned: 0,        // 아르바이트(퀴즈)로 번 돈 (만 원)
+    rate: null,       // 우리 반이 투표로 정한 세율 (0·10·30)
+    tax: 0,           // 낸 세금 (만 원)
+    support: 0,       // 받은 국가 지원금 (만 원)
+    supportStatus: '미신청',   // 미신청 · 승인 · 탈락
+    loan: 0,          // 빌린 돈 (만 원)
     job: null,        // 아르바이트 진행 상황 { order:[문제id], done:{문제id: 맞힘여부} }
     answers: { q1: '', q2: '', q3: '', q4: '', q3choice: '' },
     submitted: false, count: 0,
@@ -87,15 +92,24 @@ GL.App = {
   record: function () {
     var S = GL.state;
     var s = GL.sim.summarize(S.results);
-    var letter = GL.LETTER.compose({ level: S.level, earned: S.earned, spent: S.spent, picks: S.results });
+    var letter = GL.LETTER.compose(GL.App.moneyRec());
     return {
       id: S.id, name: S.name, clsLabel: S.clsLabel, level: S.level,
       budget: S.budget, spent: S.spent, earned: S.earned,
+      rate: S.rate || 0, tax: S.tax, support: S.support, supportStatus: S.supportStatus, loan: S.loan,
       total: s.total, treat: s.treat, border: s.border, enhance: s.enhance, side: s.side,
       picks: S.results, letterType: letter.type,
       q1: S.answers.q1, q2: S.answers.q2, q3choice: S.answers.q3choice, q3: S.answers.q3, q4: S.answers.q4,
       elapsed: Math.round((Date.now() - S.startedAt) / 1000)
     };
+  },
+
+  // 해설·편지 계산에 쓰는 돈 정보 묶음
+  moneyRec: function () {
+    var S = GL.state;
+    return { level: S.level, budget: S.budget, spent: S.spent, earned: S.earned,
+      tax: S.tax, support: S.support, supportStatus: S.supportStatus, loan: S.loan, rate: S.rate || 0,
+      picks: S.results };
   },
 
   /* ---------- 제출 완료 화면 ---------- */
@@ -117,6 +131,8 @@ GL.App = {
   resume: function (saved) {
     GL.state = Object.assign(GL.newState(), saved);
     var go = {
+      'scr-vote': GL.Vote.show,
+      'scr-wait': GL.Vote.wait,
       'scr-card': GL.Card.show,
       'scr-shop': GL.Shop.show,
       'scr-report': GL.Report.show,

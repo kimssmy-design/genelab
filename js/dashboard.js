@@ -53,6 +53,7 @@ GL.Dash = {
   load: function (res) {
     var D = GL.Dash;
     D.roster = res.roster || [];
+    D.votes = res.votes || {};
     D.subs = {};
     (res.subs || []).forEach(function (s) { D.subs[s.id] = s; });
 
@@ -94,6 +95,8 @@ GL.Dash = {
     D.renderEdit(subs);
     D.renderMoney(subs);
     D.renderEarn(subs);
+    D.renderLoan(subs);
+    D.renderVote();
     D.renderQ3(subs);
     D.renderChips();
     D.renderAnswers();
@@ -160,6 +163,77 @@ GL.Dash = {
         '<div class="sbar"><span class="seg-earn" style="width:' + Math.min(100, avg / max * 100) + '%"></span></div>' +
         '<span class="row-val mono">' + (list.length ? Math.round(avg) + '만' : '—') + '</span></div>';
     }).join('');
+  },
+
+  renderLoan: function (subs) {
+    var D = GL.Dash;
+    var g = D.byLevel(subs);
+    var max = 1;
+    [1, 2, 3, 4, 5].forEach(function (lv) { max = Math.max(max, D.avg(g[lv], 'loan')); });
+    GL.util.$('statLoan').innerHTML = [1, 2, 3, 4, 5].map(function (lv) {
+      var list = g[lv];
+      var avg = D.avg(list, 'loan');
+      var rej = list.filter(function (s) { return s.supportStatus === '탈락'; }).length;
+      return '<div class="stat-row loan-row">' + D.rowLabel(lv, list.length) +
+        '<div class="sbar"><span class="seg-loan" style="width:' + (avg / max * 100) + '%"></span></div>' +
+        '<span class="row-val mono">' + (list.length ? GL.util.money(Math.round(avg)).replace(' 원', '') : '—') + '</span>' +
+        '<span class="row-val mono' + (rej ? ' side-val' : ' muted') + '">' + (list.length ? '탈락 ' + rej + '명' : '') + '</span></div>';
+    }).join('');
+  },
+
+  /* ---------- 세율 투표 ---------- */
+  renderVote: function () {
+    var D = GL.Dash;
+    var u = GL.util;
+    var v = (D.votes || {})[D.cls] || { counts: { 0: 0, 10: 0, 30: 0 }, voted: 0, closed: false, rate: null };
+    var total = D.classRoster().length;
+    u.$('voteState').textContent = v.closed ? '확정: 세율 ' + v.rate + '%' : '진행 중 · ' + v.voted + '/' + total + '명 투표';
+    var maxN = Math.max(1, v.voted);
+    u.$('statVote').innerHTML = GL.POLICY.RATES.map(function (r) {
+      var n = v.counts[r] || 0;
+      var info = GL.POLICY.RATE_INFO[r];
+      return '<div class="stat-row vote-row' + (v.closed && v.rate === r ? ' win' : '') + '">' +
+        '<div class="row-label"><b class="mono">' + r + '%</b><span class="lv-name">' + info.name + '</span></div>' +
+        '<div class="sbar"><span class="seg-vote" style="width:' + (n / maxN * 100) + '%"></span></div>' +
+        '<span class="row-val mono">' + n + '표</span></div>';
+    }).join('');
+    var act = u.$('voteActions');
+    if (D.tie) {
+      act.innerHTML = '<span class="small">동점이에요. 어느 세율로 정할까요?</span>' + D.tie.map(function (r) {
+        return '<button class="btn btn-sm" data-force="' + r + '">' + r + '%로 확정</button>';
+      }).join('');
+      act.querySelectorAll('[data-force]').forEach(function (b) {
+        b.onclick = function () { D.closeVote(Number(b.dataset.force)); };
+      });
+    } else if (v.closed) {
+      act.innerHTML = '<span class="muted small">학생들이 결과를 보고 형편 카드를 받고 있어요.</span>' +
+        '<button class="btn btn-sm" id="voteReset">투표 다시 하기</button>';
+      u.$('voteReset').onclick = D.resetVote;
+    } else {
+      act.innerHTML = '<button class="btn btn-sm btn-ink" id="voteClose">투표 마감하고 결과 확정</button>' +
+        '<span class="muted small">학생 화면은 5~7초마다 자동으로 확인해요. 결과를 보려면 새로고침을 눌러 주세요.</span>';
+      u.$('voteClose').onclick = function () { D.closeVote(null); };
+    }
+  },
+
+  closeVote: async function (force) {
+    var D = GL.Dash;
+    var res = await GL.api.call('closeVote', { pw: D.pw, cls: D.cls, force: force });
+    if (!res.ok) { D.toast(res.msg); return; }
+    if (res.tie) { D.tie = res.tie; D.renderVote(); return; }
+    D.tie = null;
+    D.toast('세율 ' + res.rate + '%로 확정했어요');
+    D.refresh();
+  },
+
+  resetVote: async function () {
+    var D = GL.Dash;
+    if (!confirm('이 반의 투표 기록과 확정된 세율을 지울까요?\n이미 형편 카드를 받은 학생의 세금은 바뀌지 않아요.')) return;
+    var res = await GL.api.call('resetVote', { pw: D.pw, cls: D.cls });
+    if (!res.ok) { D.toast(res.msg); return; }
+    D.tie = null;
+    D.toast('투표를 초기화했어요');
+    D.refresh();
   },
 
   renderQ3: function (subs) {
@@ -321,7 +395,7 @@ GL.Dash = {
     u.$('pwBtn').onclick = GL.Dash.unlock;
     u.$('pwInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') GL.Dash.unlock(); });
     u.$('refreshBtn').onclick = GL.Dash.refresh;
-    u.$('clsSelect').onchange = function () { GL.Dash.cls = this.value; GL.Dash.render(); };
+    u.$('clsSelect').onchange = function () { GL.Dash.cls = this.value; GL.Dash.tie = null; GL.Dash.render(); };
     u.$('closeBtn').onclick = function () { u.$('viewer').classList.add('hidden'); };
     u.$('cmpBtn').onclick = GL.Dash.toggleCompare;
     u.$('jpgBtn').onclick = GL.Dash.saveJpg;
