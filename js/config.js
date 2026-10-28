@@ -6,7 +6,7 @@ var GL = window.GL = window.GL || {};
 
 GL.CONFIG = {
   // 앱스크립트 [배포 → 새 배포 → 웹 앱]에서 받은 주소 (…/exec 로 끝나야 함)
-  GAS_URL: 'https://script.google.com/macros/s/AKfycby_ZNSiFTQs7FssGrCAeJG-C0ufMIXWlPS6_FiPZ_jFXOuPHgxEFAeNXqmwseOr5q-L/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbzpYemb4X0b9nohRB46pxnWvxGGIPBUtkP2tKc3LSHqukdtFHJSKq1kMNkiXOcBeTDvHg/exec',
 
   // 성찰 답변 최소 글자 수 (공백 제외)
   MIN_CHARS: 20
