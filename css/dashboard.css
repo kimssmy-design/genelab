@@ -132,3 +132,20 @@ body.tv #dashScr, body.tv .viewer-cards { zoom: 1.3; }
 .seg-loan { background: var(--enh); }
 .loan-row { grid-template-columns: 150px minmax(0, 1fr) 90px 70px; }
 @media (max-width: 900px) { .loan-row { grid-template-columns: 120px 1fr 80px 60px; } }
+
+/* ---------- Q4 책임 · 다시 투표 ---------- */
+.seg-border { background: var(--border); }
+.c-border { background: var(--border-bg); color: var(--border); }
+.sw-r0, .seg-r0 { background: #c4c8cd; }
+.sw-r10, .seg-r10 { background: #7c838b; }
+.sw-r30, .seg-r30 { background: var(--ink); }
+.seg-r0 { color: var(--ink) !important; }
+.c-r0 { background: #e9ebee; color: var(--ink); }
+.c-r10 { background: #7c838b; color: #fff; }
+.c-r30 { background: var(--ink); color: #fff; }
+.revote-note { margin: -4px 0 6px; }
+.revote-bars { display: grid; grid-template-columns: 34px 1fr; gap: 4px 8px; align-items: center; }
+.rv-tag { font-size: 11px; color: var(--muted); }
+.sbar.thin { height: 16px; }
+.revote-row { grid-template-columns: 150px minmax(0, 1fr) 80px; }
+@media (max-width: 900px) { .revote-row { grid-template-columns: 120px 1fr 70px; } }

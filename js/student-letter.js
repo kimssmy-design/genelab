@@ -1,5 +1,5 @@
 /* =========================================================
-   student-letter.js — 아이의 편지 + 성찰 질문 4개 + 제출
+   student-letter.js — 아이의 편지 + 성찰 질문 6개 + 제출
    답변은 쓰는 대로 저장돼서 새로고침해도 남아 있어요.
    ========================================================= */
 GL.Letter = {
@@ -14,11 +14,11 @@ GL.Letter = {
     var u = GL.util;
     var form = u.$('qForm');
     form.innerHTML = GL.STORY.QUESTIONS.map(function (q) {
-      var choice = q.choice ? '<div class="seg" id="q3seg">' + GL.STORY.Q3_CHOICES.map(function (c) {
+      var seg = q.choices ? '<div class="seg" id="seg-' + q.key + '">' + q.choices.map(function (c) {
         return '<button type="button" class="seg-btn" data-v="' + u.esc(c) + '">' + u.esc(c) + '</button>';
       }).join('') + '</div>' : '';
       return '<div class="qbox" id="box-' + q.key + '">' +
-        '<label for="' + q.key + '">' + u.esc(q.label) + '</label>' + choice +
+        '<label for="' + q.key + '">' + u.esc(q.label) + '</label>' + seg +
         '<textarea id="' + q.key + '" rows="2" placeholder="' + u.esc(q.ph) + '"></textarea>' +
         '<div class="qmeta"><span class="qerr" id="err-' + q.key + '"></span>' +
         '<span class="qcount mono" id="cnt-' + q.key + '">0/' + GL.CONFIG.MIN_CHARS + '</span></div></div>';
@@ -31,20 +31,22 @@ GL.Letter = {
         GL.Letter.updateCount(q.key);
         GL.App.save();
       });
-    });
-    u.$('q3seg').querySelectorAll('.seg-btn').forEach(function (b) {
-      b.onclick = function () {
-        GL.state.answers.q3choice = b.dataset.v;
-        GL.Letter.paintChoice();
-        u.$('err-q3').textContent = '';
-        GL.App.save();
-      };
+      if (!q.choices) return;
+      u.$('seg-' + q.key).querySelectorAll('.seg-btn').forEach(function (b) {
+        b.onclick = function () {
+          GL.state.answers[q.key + 'choice'] = b.dataset.v;
+          GL.Letter.paintChoice(q.key);
+          GL.Letter.checkText(q.key);
+          GL.App.save();
+        };
+      });
     });
   },
 
-  paintChoice: function () {
-    var v = GL.state.answers.q3choice;
-    GL.util.$('q3seg').querySelectorAll('.seg-btn').forEach(function (x) { x.classList.toggle('on', x.dataset.v === v); });
+  // 고르기 질문의 선택 표시
+  paintChoice: function (key) {
+    var v = GL.state.answers[key + 'choice'];
+    GL.util.$('seg-' + key).querySelectorAll('.seg-btn').forEach(function (x) { x.classList.toggle('on', x.dataset.v === v); });
   },
 
   show: function () {
@@ -59,8 +61,8 @@ GL.Letter = {
     GL.STORY.QUESTIONS.forEach(function (q) {
       u.$(q.key).value = S.answers[q.key] || '';
       GL.Letter.updateCount(q.key);
+      if (q.choices) GL.Letter.paintChoice(q.key);
     });
-    GL.Letter.paintChoice();
 
     u.$('submitBtn').textContent = S.submitted ? '고친 답변 제출하기' : '제출하기';
     u.$('submitErr').textContent = '';
@@ -73,17 +75,27 @@ GL.Letter = {
     var c = GL.util.$('cnt-' + key);
     c.textContent = n + '/' + GL.CONFIG.MIN_CHARS;
     c.classList.toggle('done', n >= GL.CONFIG.MIN_CHARS);
-    if (n >= GL.CONFIG.MIN_CHARS) GL.util.$('err-' + key).textContent = '';
+    GL.Letter.checkText(key, true);
+  },
+
+  // 이 질문의 오류 문구 (quiet: 이미 오류가 떠 있을 때만 다시 계산)
+  checkText: function (key, quiet) {
+    var u = GL.util;
+    var q = GL.STORY.QUESTIONS.filter(function (x) { return x.key === key; })[0];
+    var err = u.$('err-' + key);
+    if (quiet && !err.textContent) return '';
+    var msg = '';
+    if (q.choices && !GL.state.answers[key + 'choice']) msg = '하나를 골라 주세요. ';
+    if (u.chars(u.$(key).value) < GL.CONFIG.MIN_CHARS) msg += '공백 빼고 ' + GL.CONFIG.MIN_CHARS + '자 이상 써 주세요.';
+    err.textContent = msg;
+    return msg;
   },
 
   validate: function () {
     var u = GL.util;
     var firstBad = null;
     GL.STORY.QUESTIONS.forEach(function (q) {
-      var msg = '';
-      if (q.choice && !GL.state.answers.q3choice) msg = '하나를 골라 주세요. ';
-      if (u.chars(u.$(q.key).value) < GL.CONFIG.MIN_CHARS) msg += '공백 빼고 ' + GL.CONFIG.MIN_CHARS + '자 이상 써 주세요.';
-      u.$('err-' + q.key).textContent = msg;
+      var msg = GL.Letter.checkText(q.key);
       if (msg && !firstBad) firstBad = q.key;
     });
     if (firstBad) {

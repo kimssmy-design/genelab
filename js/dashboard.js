@@ -9,14 +9,20 @@ GL.Dash = {
   cls: '',
   viewIds: [],   // 크게 보는 학생 (최대 2명)
   picking: false,
-  ansQ: 'q2',    // 답변 모아보기: 보고 있는 질문
+  ansQ: 'q1',    // 답변 모아보기: 보고 있는 질문
   ansLv: 0,      // 답변 모아보기: 형편 단계 필터 (0 = 전체)
 
+  // 학생 화면(data-story.js)의 질문과 같은 순서 · 고르기 질문은 선택지와 색 이름(cls)을 함께 둠
   QUESTIONS: [
-    { key: 'q1', short: 'Q1 좋은 점', full: 'Q1. 유전자 편집 기술의 좋은 점은 무엇일까요?' },
-    { key: 'q2', short: 'Q2 문제점',  full: 'Q2. 이 기술이 널리 쓰이면 어떤 문제가 생길 수 있을까요?' },
-    { key: 'q3', short: 'Q3 허용 범위', full: 'Q3. 유전자 편집을 어디까지 허용해야 할까요?' },
-    { key: 'q4', short: 'Q4 답장',    full: 'Q4. 아이의 편지에 한 줄로 답장해 보세요.' }
+    { key: 'q1', short: 'Q1 내 카드', full: 'Q1. 내 형편 카드로 할 수 있었던 것과 할 수 없었던 것은? 그때 기분은?' },
+    { key: 'q2', short: 'Q2 좋은 점·걱정', full: 'Q2. 유전자 편집 기술의 좋은 점 한 가지와 걱정되는 점 한 가지' },
+    { key: 'q3', short: 'Q3 허용 범위', full: 'Q3. 유전자 편집을 어디까지 허용해야 할까요?',
+      choices: ['전면 금지', '질병 치료만 허용', '능력 향상까지 허용'], cls: ['c-ban', 'c-treat', 'c-enh'] },
+    { key: 'q4', short: 'Q4 책임', full: 'Q4. 의도하지 않은 변화가 생겼다면, 책임은 누구에게 있을까요?',
+      choices: ['부모', '의사·회사', '국가'], cls: ['c-ban', 'c-border', 'c-treat'] },
+    { key: 'q5', short: 'Q5 다시 투표', full: 'Q5. 내 형편을 알게 된 지금, 세율 투표를 다시 한다면?',
+      choices: ['0%', '10%', '30%'], cls: ['c-r0', 'c-r10', 'c-r30'] },
+    { key: 'q6', short: 'Q6 답장', full: 'Q6. 아이의 편지에 한 줄로 답장해 보세요.' }
   ],
 
   /* ---------- 불러오기 ---------- */
@@ -97,7 +103,9 @@ GL.Dash = {
     D.renderEarn(subs);
     D.renderLoan(subs);
     D.renderVote();
-    D.renderQ3(subs);
+    D.renderChoice(subs, 'q3', 'statQ3');
+    D.renderChoice(subs, 'q4', 'statQ4');
+    D.renderRevote(subs);
     D.renderChips();
     D.renderAnswers();
   },
@@ -236,17 +244,17 @@ GL.Dash = {
     D.refresh();
   },
 
-  renderQ3: function (subs) {
+  // 고르기 질문(Q3·Q4)을 형편 단계별 막대로
+  renderChoice: function (subs, key, targetId) {
     var D = GL.Dash;
+    var q = D.QUESTIONS.filter(function (x) { return x.key === key; })[0];
     var g = D.byLevel(subs);
-    var keys = ['전면 금지', '질병 치료만 허용', '능력 향상까지 허용'];
-    var cls = ['seg-ban', 'seg-treat', 'seg-enh'];
     function bar(list) {
       var n = list.length;
       if (!n) return '<div class="sbar"></div>';
-      return '<div class="sbar">' + keys.map(function (k, i) {
-        var c = list.filter(function (s) { return s.q3choice === k; }).length;
-        return c ? '<span class="' + cls[i] + '" style="width:' + (c / n * 100) + '%">' + c + '</span>' : '';
+      return '<div class="sbar">' + q.choices.map(function (k, i) {
+        var c = list.filter(function (s) { return s[key + 'choice'] === k; }).length;
+        return c ? '<span class="' + q.cls[i].replace('c-', 'seg-') + '" style="width:' + (c / n * 100) + '%">' + c + '</span>' : '';
       }).join('') + '</div>';
     }
     var html = [1, 2, 3, 4, 5].map(function (lv) {
@@ -254,8 +262,39 @@ GL.Dash = {
     }).join('');
     html += '<div class="stat-row stat-total"><div class="row-label"><b>반 전체</b><span class="muted mono small">' +
       subs.length + '명</span></div>' + bar(subs) + '<span class="row-val"></span></div>';
-    GL.util.$('statQ3').innerHTML = html;
+    GL.util.$(targetId).innerHTML = html;
   },
+
+  // 세율 투표: 처음(형편을 모를 때) → 다시(Q5, 형편을 안 뒤)
+  renderRevote: function (subs) {
+    var D = GL.Dash;
+    var g = D.byLevel(subs);
+    var rates = [0, 10, 30];
+    var cls = ['seg-r0', 'seg-r10', 'seg-r30'];
+    function bar(vals) {
+      var n = vals.length;
+      if (!n) return '<div class="sbar thin"></div>';
+      return '<div class="sbar thin">' + rates.map(function (r, i) {
+        var c = vals.filter(function (v) { return v === r; }).length;
+        return c ? '<span class="' + cls[i] + '" style="width:' + (c / n * 100) + '%">' + c + '</span>' : '';
+      }).join('') + '</div>';
+    }
+    function row(label, list) {
+      var both = list.filter(function (s) { return s.firstVote !== null && s.firstVote !== undefined && s.q5choice; });
+      var first = both.map(function (s) { return Number(s.firstVote); });
+      var again = both.map(function (s) { return parseInt(s.q5choice, 10); });
+      var changed = both.filter(function (s) { return Number(s.firstVote) !== parseInt(s.q5choice, 10); }).length;
+      return '<div class="stat-row revote-row">' + label +
+        '<div class="revote-bars"><span class="rv-tag">처음</span>' + bar(first) +
+        '<span class="rv-tag">다시</span>' + bar(again) + '</div>' +
+        '<span class="row-val mono' + (changed ? ' side-val' : ' muted') + '">' + (both.length ? '바뀜 ' + changed + '명' : '—') + '</span></div>';
+    }
+    var html = [1, 2, 3, 4, 5].map(function (lv) { return row(D.rowLabel(lv, g[lv].length), g[lv]); }).join('');
+    html += row('<div class="row-label"><b>반 전체</b><span class="muted mono small">' + subs.length + '명</span></div>', subs)
+      .replace('stat-row revote-row', 'stat-row revote-row stat-total');
+    GL.util.$('statRevote').innerHTML = html;
+  },
+
 
   renderChips: function () {
     var D = GL.Dash;
@@ -299,10 +338,11 @@ GL.Dash = {
       .sort(function (a, b) { return (a.level - b.level) || (a.id < b.id ? -1 : 1); });
     u.$('ansTitle').textContent = q.full;
     u.$('ansCount').textContent = list.length + '개의 답변';
-    var choiceCls = { '전면 금지': 'c-ban', '질병 치료만 허용': 'c-treat', '능력 향상까지 허용': 'c-enh' };
     u.$('ansList').innerHTML = list.map(function (s) {
-      var choice = q.key === 'q3' && s.q3choice
-        ? '<span class="ans-choice ' + (choiceCls[s.q3choice] || '') + '">' + u.esc(s.q3choice) + '</span>' : '';
+      var picked = q.choices ? s[q.key + 'choice'] : '';
+      var extra = q.key === 'q5' && s.firstVote !== null && s.firstVote !== undefined ? ' (처음 ' + s.firstVote + '%)' : '';
+      var choice = picked
+        ? '<span class="ans-choice ' + (q.cls[q.choices.indexOf(picked)] || '') + '">' + u.esc(picked + extra) + '</span>' : '';
       return '<article class="ans-card">' +
         '<header><span class="lv-chip lv' + s.level + '">L' + s.level + '</span>' +
         '<span class="mono muted">' + s.id.slice(2) + '</span><b>' + u.esc(s.name) + '</b>' + choice + '</header>' +

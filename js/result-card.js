@@ -1,7 +1,7 @@
 /* =========================================================
    result-card.js — 학생 결과 카드 HTML 만들기
    학생 완료 화면과 교사 대시보드에서 똑같이 사용
-   rec = { id, name, level, budget, spent, picks:[{id,status}], q1, q2, q3choice, q3, q4, count, time }
+   rec = { id, name, level, budget, spent, picks:[{id,status}], q1~q6, q3choice·q4choice·q5choice, firstVote, count, time }
    opts.meta = true 이면 제출 횟수·시간 표시 (대시보드용)
    opts.summary = true 이면 종합 해설 첫 문단 표시 (data-life.js 필요)
    ========================================================= */
@@ -63,10 +63,13 @@ GL.ResultCard = {
           ? '<p class="rc-summary">' + u.esc(GL.LIFE_SUMMARY(rec)[0]) + '</p>' : '') +
         '<ul class="rc-picks">' + pickHtml + '</ul>' +
         '<div class="rc-answers">' +
-          ans('Q1 좋은 점', rec.q1) +
-          ans('Q2 문제점', rec.q2) +
-          ans('Q3 ' + (rec.q3choice || ''), rec.q3) +
-          ans('Q4 답장', rec.q4) +
+          ans('Q1 내 카드', rec.q1) +
+          ans('Q2 좋은 점·걱정', rec.q2) +
+          ans('Q3 허용 범위 · ' + (rec.q3choice || '—'), rec.q3) +
+          ans('Q4 책임 · ' + (rec.q4choice || '—'), rec.q4) +
+          ans('Q5 다시 투표 · ' + (rec.q5choice || '—') +
+            (rec.firstVote !== null && rec.firstVote !== undefined && rec.firstVote !== '' ? ' (처음 ' + rec.firstVote + '%)' : ''), rec.q5) +
+          ans('Q6 답장', rec.q6) +
         '</div>' +
       '</article>';
   }

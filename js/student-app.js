@@ -19,7 +19,7 @@ GL.newState = function () {
     supportStatus: '미신청',   // 미신청 · 승인 · 탈락
     loan: 0,          // 빌린 돈 (만 원)
     job: null,        // 아르바이트 진행 상황 { order:[문제id], done:{문제id: 맞힘여부} }
-    answers: { q1: '', q2: '', q3: '', q4: '', q3choice: '' },
+    answers: GL.STORY.emptyAnswers(),   // q1~q6 + q3choice·q4choice·q5choice
     submitted: false, count: 0,
     startedAt: 0, screen: 'scr-login'
   };
@@ -99,7 +99,11 @@ GL.App = {
       rate: S.rate || 0, tax: S.tax, support: S.support, supportStatus: S.supportStatus, loan: S.loan,
       total: s.total, treat: s.treat, border: s.border, enhance: s.enhance, side: s.side,
       picks: S.results, letterType: letter.type,
-      q1: S.answers.q1, q2: S.answers.q2, q3choice: S.answers.q3choice, q3: S.answers.q3, q4: S.answers.q4,
+      q1: S.answers.q1, q2: S.answers.q2,
+      q3choice: S.answers.q3choice, q3: S.answers.q3,
+      q4choice: S.answers.q4choice, q4: S.answers.q4,
+      q5choice: S.answers.q5choice, q5: S.answers.q5,
+      q6: S.answers.q6,
       elapsed: Math.round((Date.now() - S.startedAt) / 1000)
     };
   },
@@ -130,6 +134,7 @@ GL.App = {
   // 저장된 진행 상황으로 돌아가기
   resume: function (saved) {
     GL.state = Object.assign(GL.newState(), saved);
+    GL.state.answers = Object.assign(GL.STORY.emptyAnswers(), saved.answers || {});   // 예전 형식 답변도 안전하게
     var go = {
       'scr-vote': GL.Vote.show,
       'scr-wait': GL.Vote.wait,

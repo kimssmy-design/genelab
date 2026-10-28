@@ -58,7 +58,8 @@ GL.Login = {
       S.support = Number(sub.support) || 0;
       S.supportStatus = sub.supportStatus || '미신청';
       S.loan = Number(sub.loan) || 0;
-      S.answers = { q1: sub.q1, q2: sub.q2, q3: sub.q3, q4: sub.q4, q3choice: sub.q3choice };
+      S.answers = GL.STORY.emptyAnswers();
+      Object.keys(S.answers).forEach(function (k) { if (sub[k] != null) S.answers[k] = String(sub[k]); });
       S.submitted = true;
       S.count = Number(sub.count) || 1;
       GL.App.showDone();

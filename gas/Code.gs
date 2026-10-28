@@ -17,10 +17,13 @@ var SH_CLASS = '반설정';
 var CARD_HEADER = ['학번', '이름', '반', '단계', '배정일시'];
 var VOTE_HEADER = ['학번', '반', '선택(%)', '투표일시'];
 var CLASS_HEADER = ['반', '확정 세율(%)', '확정일시', '카드 순서'];
+// 열 순서 (0부터): 0~12 쇼핑 결과 / 13~21 답변 / 22~24 제출 정보 / 25~30 돈
 var SUB_HEADER = ['학번', '이름', '반', '단계', '예산(만원)', '사용금액(만원)', '편집수', '치료', '경계', '향상',
-  '의도치않은변화', '선택결과(JSON)', '편지유형', 'Q1 좋은점', 'Q2 문제점', 'Q3 선택', 'Q3 이유', 'Q4 답장',
+  '의도치않은변화', '선택결과(JSON)', '편지유형',
+  'Q1 내 카드', 'Q2 좋은점·걱정', 'Q3 허용(선택)', 'Q3 이유', 'Q4 책임(선택)', 'Q4 이유', 'Q5 다시투표(선택)', 'Q5 이유', 'Q6 답장',
   '소요시간(초)', '제출횟수', '최종제출일시', '번 돈(만원)',
   '세율(%)', '세금(만원)', '국가 지원(만원)', '지원 신청', '대출(만원)'];
+var COL_COUNT = 23;   // '제출횟수' 열 (0부터)
 
 /* ---------- 라우터 ---------- */
 function doGet(e) {
@@ -327,7 +330,7 @@ function handleSubmit(params) {
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][0]).trim() === id) {
         rowIdx = i + 1;
-        count = Number(data[i][19]) || 0;
+        count = Number(data[i][COL_COUNT]) || 0;
         break;
       }
     }
@@ -338,17 +341,18 @@ function handleSubmit(params) {
       Number(params.total) || 0, Number(params.treat) || 0, Number(params.border) || 0,
       Number(params.enhance) || 0, Number(params.side) || 0,
       JSON.stringify(params.picks || []), clean_(params.letterType),
-      clean_(params.q1), clean_(params.q2), clean_(params.q3choice), clean_(params.q3), clean_(params.q4),
+      clean_(params.q1), clean_(params.q2), clean_(params.q3choice), clean_(params.q3),
+      clean_(params.q4choice), clean_(params.q4), clean_(params.q5choice), clean_(params.q5), clean_(params.q6),
       Number(params.elapsed) || 0, count + 1, now_(),
       Number(params.earned) || 0,
       Number(params.rate) || 0, Number(params.tax) || 0, Number(params.support) || 0,
       clean_(params.supportStatus || '미신청'), Number(params.loan) || 0
     ];
 
-    // 쇼핑은 1회만: 이미 제출한 학생이면 답변(14~18열)과 제출 횟수·시간만 바꾸고 나머지는 첫 제출 값 유지
+    // 쇼핑은 1회만: 이미 제출한 학생이면 답변(13~21)과 제출 횟수·시간만 바꾸고 나머지는 첫 제출 값 유지
     if (rowIdx > 0) {
       var old = data[rowIdx - 1];
-      var keep = [4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 21, 22, 23, 24, 25, 26];
+      var keep = [4, 5, 6, 7, 8, 9, 10, 11, 12, 22, 25, 26, 27, 28, 29, 30];
       for (var k = 0; k < keep.length; k++) {
         var col = keep[k];
         if (old[col] !== '' && old[col] != null) row[col] = old[col];
@@ -358,6 +362,7 @@ function handleSubmit(params) {
     if (rowIdx < 0) rowIdx = sh.getLastRow() + 1;
     sh.getRange(rowIdx, 1, 1, 3).setNumberFormat('@');   // 학번·이름·반 텍스트로
     sh.getRange(rowIdx, 12).setNumberFormat('@');
+    sh.getRange(rowIdx, 20).setNumberFormat('@');   // Q5 '10%'가 숫자 0.1로 바뀌지 않게
     sh.getRange(rowIdx, 1, 1, row.length).setValues([row]);
     SpreadsheetApp.flush();
     return { ok: true, count: count + 1 };
@@ -391,6 +396,17 @@ function handleDashboard(params) {
     subs.push(rowToSub_(data[i]));
   }
 
+  // 학생별 처음 투표(세율투표 시트) → 다시 투표(Q5)와 비교용
+  var firstVotes = {};
+  var vsh = ss.getSheetByName(SH_VOTE);
+  if (vsh && vsh.getLastRow() >= 2) {
+    var vdata = vsh.getDataRange().getValues();
+    for (var v = 1; v < vdata.length; v++) firstVotes[String(vdata[v][0]).trim()] = Number(vdata[v][2]);
+  }
+  for (var f = 0; f < subs.length; f++) {
+    subs[f].firstVote = firstVotes[subs[f].id] !== undefined ? firstVotes[subs[f].id] : null;
+  }
+
   // 반별 투표 현황
   var tallies = tally_(ss);
   var votes = {};
@@ -412,12 +428,13 @@ function rowToSub_(d) {
     budget: Number(d[4]), spent: Number(d[5]),
     total: Number(d[6]), treat: Number(d[7]), border: Number(d[8]), enhance: Number(d[9]), side: Number(d[10]),
     picks: picks, letterType: String(d[12]),
-    q1: String(d[13]), q2: String(d[14]), q3choice: String(d[15]), q3: String(d[16]), q4: String(d[17]),
-    elapsed: Number(d[18]), count: Number(d[19]),
-    time: (d[20] instanceof Date) ? Utilities.formatDate(d[20], 'Asia/Seoul', 'MM-dd HH:mm') : String(d[20]),
-    earned: Number(d[21]) || 0,
-    rate: Number(d[22]) || 0, tax: Number(d[23]) || 0, support: Number(d[24]) || 0,
-    supportStatus: String(d[25] || '미신청'), loan: Number(d[26]) || 0
+    q1: String(d[13]), q2: String(d[14]), q3choice: String(d[15]), q3: String(d[16]),
+    q4choice: String(d[17]), q4: String(d[18]), q5choice: String(d[19]), q5: String(d[20]), q6: String(d[21]),
+    elapsed: Number(d[22]), count: Number(d[23]),
+    time: (d[24] instanceof Date) ? Utilities.formatDate(d[24], 'Asia/Seoul', 'MM-dd HH:mm') : String(d[24]),
+    earned: Number(d[25]) || 0,
+    rate: Number(d[26]) || 0, tax: Number(d[27]) || 0, support: Number(d[28]) || 0,
+    supportStatus: String(d[29] || '미신청'), loan: Number(d[30]) || 0
   };
 }
 
