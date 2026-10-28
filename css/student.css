@@ -254,6 +254,12 @@ main { height: calc(100dvh - 52px - env(safe-area-inset-top, 0px)); }
   .letter { position: static; }
 }
 @media (max-width: 480px) {
+  /* 상단 바: 'STEP' 글자와 '사용법' 글자를 숨기고 동그란 ? 버튼만 */
+  .topbar { padding: 0 14px; }
+  .brand { font-size: 14px; gap: 6px; }
+  .topbar-right { gap: 10px; }
+  .step-word, .help-word { display: none; }
+  .help-btn { width: 34px; min-height: 34px; height: 34px; padding: 0; border-radius: 50%; font-size: 15px; font-weight: 700; }
   .opt-grid { grid-template-columns: 1fr; }
   /* 폰: 남은 예산과 탄생 버튼을 한 줄로, 분류 탭은 옆으로 밀기 */
   .shop-panel { padding: 10px 14px; gap: 6px 10px; }

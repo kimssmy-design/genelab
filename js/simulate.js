@@ -18,13 +18,14 @@ GL.sim = {
 
   // picks: [{id, status}] → 개수 요약
   summarize: function (picks) {
-    var s = { total: 0, treat: 0, border: 0, enhance: 0, side: 0, ids: {}, firstSide: null, firstEnh: null };
+    var s = { total: 0, treat: 0, border: 0, enhance: 0, side: 0, none: 0, ids: {}, firstSide: null, firstEnh: null };
     (picks || []).forEach(function (p) {
       var o = GL.optById[p.id];
       if (!o) return;
       s.total++;
       s.ids[o.id] = true;
       s[o.tag]++;
+      if (p.status === 'none') s.none++;
       if (p.status === 'side') {
         s.side++;
         if (!s.firstSide) s.firstSide = o;

@@ -9,7 +9,8 @@ GL.newState = function () {
     id: '', name: '', clsLabel: '', level: 0, budget: 0,
     picks: [],        // 고른 옵션 id (고른 순서대로)
     voucherId: null,  // L1 국가 지원으로 무료 처리된 옵션 id
-    results: [],      // 탄생 후 [{id, status}] — 한 번 정해지면 바뀌지 않음
+    results: [],
+    news: [],         // 20년 후 뉴스 4개 (처음 볼 때 고르고 저장)      // 탄생 후 [{id, status}] — 한 번 정해지면 바뀌지 않음
     spent: 0,         // 탄생 때 확정된 사용 금액
     earned: 0,        // 아르바이트(퀴즈)로 번 돈 (만 원)
     job: null,        // 아르바이트 진행 상황 { order:[문제id], done:{문제id: 맞힘여부} }
@@ -36,7 +37,7 @@ GL.App = {
   show: function (screenId, step, year) {
     document.querySelectorAll('.screen').forEach(function (el) { el.classList.remove('active'); });
     GL.util.$(screenId).classList.add('active');
-    GL.util.$('stepLabel').textContent = step ? 'STEP ' + step + '/4' : '';
+    GL.util.$('stepLabel').innerHTML = step ? '<span class="step-word">STEP </span>' + step + '/4' : '';
     GL.util.$('yearLabel').textContent = year || 2045;
     window.scrollTo(0, 0);
     GL.state.screen = screenId;
@@ -71,17 +72,16 @@ GL.App = {
     GL.App.modal(
       '<h3>사용법</h3>' +
       '<ol class="help-list">' +
-      '<li>학번을 넣으면 우리 집의 <b>형편 카드</b>를 받아요. 카드는 무작위이고 바꿀 수 없어요.</li>' +
-      '<li>예산 안에서 아기에게 넣을 <b>유전자</b>를 골라요. 카드를 누르면 자세한 설명이 나와요.</li>' +
-      '<li>돈이 모자라면 <b>아르바이트</b>를 해요. 퀴즈를 맞힐 때마다 ' + GL.util.money(GL.JOB.PAY) + '을 벌고, 한 문제는 한 번만 풀 수 있어요.</li>' +
-      '<li><b>아이 탄생시키기</b>를 누르면 20년 뒤로 이동해요. 편집이 항상 성공하는 건 아니고, 쇼핑은 한 번만 할 수 있어요.</li>' +
-      '<li>아이의 편지를 읽고 질문에 답한 뒤 제출해요. 제출한 뒤에도 답변은 고칠 수 있어요.</li>' +
+      '<li><b>형편 카드</b>를 받아요 (무작위)</li>' +
+      '<li>예산 안에서 <b>유전자</b>를 골라요</li>' +
+      '<li>돈이 모자라면 <b>아르바이트</b> (퀴즈 1개 10만 원)</li>' +
+      '<li><b>아이 탄생</b> → 20년 후로 (쇼핑은 한 번만)</li>' +
+      '<li><b>편지</b>를 읽고 답한 뒤 제출해요</li>' +
       '</ol>' +
-      '<p class="muted small help-note">카드 위의 <span class="mono">HBB</span> 같은 글자는 바꾸는 유전자의 이름이에요. ' +
-      '<b>다유전자</b>는 키·지능처럼 수백 개 이상의 유전자가 함께 관여하는 특성이라는 뜻이고, 그래서 성공률이 낮아요.</p>' +
       '<div class="modal-actions"><button class="btn btn-ink" id="mOk">확인</button></div>');
     GL.util.$('mOk').onclick = GL.App.closeModal;
   },
+
 
   // 현재 상태 → 제출·결과 카드용 기록
   record: function () {

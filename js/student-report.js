@@ -39,10 +39,13 @@ GL.Report = {
     }).join('');
     u.$('moreHint').classList.toggle('hidden', sorted.length <= GL.Report.OPEN_COUNT);
 
-    // 뉴스 4개
-    var months = ['03', '05', '08', '11'];
-    u.$('newsList').innerHTML = GL.STORY.pickNews(s).map(function (n, i) {
-      return '<li class="news news-' + n.tone + '"><span class="news-meta mono">2065.' + months[i] + ' · ' + n.sec + '</span>' +
+    // 뉴스 4개 — 처음 볼 때 한 번 고르고 저장 (새로고침해도 그대로)
+    if (!S.news || !S.news.length) {
+      S.news = GL.STORY.pickNews(s, S.level);
+      GL.App.save();
+    }
+    u.$('newsList').innerHTML = S.news.map(function (n) {
+      return '<li class="news news-' + n.tone + '"><span class="news-meta mono">' + n.date + ' · ' + n.sec + '</span>' +
         '<span class="news-t">' + u.esc(n.t) + '</span></li>';
     }).join('');
 
