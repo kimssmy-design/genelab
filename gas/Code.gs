@@ -16,7 +16,7 @@ var SH_CLASS = '반설정';
 
 var CARD_HEADER = ['학번', '이름', '반', '단계', '배정일시'];
 var VOTE_HEADER = ['학번', '반', '선택(%)', '투표일시'];
-var CLASS_HEADER = ['반', '확정 세율(%)', '확정일시', '카드 순서'];
+var CLASS_HEADER = ['반(학년-반)', '확정 세율(%)', '확정일시', '카드 순서'];
 // 열 순서 (0부터): 0~12 쇼핑 결과 / 13~21 답변 / 22~24 제출 정보 / 25~30 돈
 var SUB_HEADER = ['학번', '이름', '반', '단계', '예산(만원)', '사용금액(만원)', '편집수', '치료', '경계', '향상',
   '의도치않은변화', '선택결과(JSON)', '편지유형',
@@ -107,7 +107,7 @@ function getDeck_(ss, cls, classSize, used) {
   var deck = buildDeck_(Math.max(classSize, 1));
   var rowIdx = info ? info.row : sh.getLastRow() + 1;
   sh.getRange(rowIdx, 1).setNumberFormat('@');
-  sh.getRange(rowIdx, 1).setValue(cls);
+  sh.getRange(rowIdx, 1).setValue(label_(cls));   // '1-1'처럼 보이게 (학번 앞 두 자리 = 학년·반)
   sh.getRange(rowIdx, 4).setNumberFormat('@');
   sh.getRange(rowIdx, 4).setValue(deck.join(','));
   return deck;
@@ -269,7 +269,7 @@ function handleCloseVote(params) {
     var info = readClass_(ss, cls);
     var rowIdx = info ? info.row : sh.getLastRow() + 1;
     sh.getRange(rowIdx, 1).setNumberFormat('@');
-    sh.getRange(rowIdx, 1, 1, 3).setValues([[cls, rate, now_()]]);
+    sh.getRange(rowIdx, 1, 1, 3).setValues([[label_(cls), rate, now_()]]);
     SpreadsheetApp.flush();
   } finally {
     lock.releaseLock();
@@ -455,7 +455,8 @@ function readClass_(ss, cls) {
   if (!sh || sh.getLastRow() < 2) return null;
   var data = sh.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim() === cls) {
+    var key = String(data[i][0]).trim();
+    if (key === label_(cls) || key === cls) {   // 예전 형식('11')도 읽을 수 있게
       return { row: i + 1, rate: data[i][1] === '' ? '' : String(data[i][1]), deck: String(data[i][3] || '') };
     }
   }
