@@ -163,7 +163,7 @@ GL.Dash = {
   renderEarn: function (subs) {
     var D = GL.Dash;
     var g = D.byLevel(subs);
-    var max = GL.QUIZ_MAX || 500;
+    var max = GL.QUIZ_MAX || 1000;   // 아르바이트 최대 (100문제 × 10만 원)
     GL.util.$('statEarn').innerHTML = [1, 2, 3, 4, 5].map(function (lv) {
       var list = g[lv];
       var avg = D.avg(list, 'earned');

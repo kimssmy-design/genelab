@@ -56,6 +56,17 @@ GL.Job = {
     GL.Job.show();
   },
 
+  // 보기 순서 섞기 (학생마다, 문제마다 달라서 '정답은 늘 1번' 같은 요령이 통하지 않음)
+  shuffledIdx: function (n) {
+    var idx = [];
+    for (var i = 0; i < n; i++) idx.push(i);
+    for (var j = n - 1; j > 0; j--) {
+      var k = Math.floor(Math.random() * (j + 1));
+      var t = idx[j]; idx[j] = idx[k]; idx[k] = t;
+    }
+    return idx;
+  },
+
   show: function () {
     var u = GL.util;
     var q = GL.Job.nextQuiz();
@@ -67,8 +78,9 @@ GL.Job = {
       '<span>정답 +' + u.money(GL.JOB.PAY) + '</span></div>' +
       '<p class="job-earned muted small">지금까지 번 돈 ' + u.money(GL.state.earned) + '</p>' +
       '<h3 class="job-q">' + u.esc(q.q) + '</h3>' +
-      '<div class="job-opts">' + q.o.map(function (o, i) {
-        return '<button class="job-opt" data-i="' + i + '"><span class="mono">' + (i + 1) + '</span>' + u.esc(o) + '</button>';
+      '<div class="job-opts">' + GL.Job.shuffledIdx(q.o.length).map(function (i, pos) {
+        // data-i는 원래 보기 번호(채점용), 화면 번호는 섞인 순서대로 1·2·3
+        return '<button class="job-opt" data-i="' + i + '"><span class="mono">' + (pos + 1) + '</span>' + u.esc(q.o[i]) + '</button>';
       }).join('') + '</div>' +
       '<div class="job-result hidden" id="jobResult"></div>' +
       '<div class="modal-actions"><button class="btn" id="jobStop">알바 마치기</button>' +
