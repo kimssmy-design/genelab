@@ -11,6 +11,8 @@ GL.newState = function () {
     voucherId: null,  // L1 국가 지원으로 무료 처리된 옵션 id
     results: [],      // 탄생 후 [{id, status}] — 한 번 정해지면 바뀌지 않음
     news: [],         // 20년 후 뉴스 4개 (처음 볼 때 고르고 저장)
+    letterOpened: false,   // 편지 봉투를 열었는지
+    replied: false,        // '답장하기'를 눌러 질문을 열었는지
     spent: 0,         // 탄생 때 확정된 사용 금액
     earned: 0,        // 아르바이트(퀴즈)로 번 돈 (만 원)
     rate: null,       // 우리 반이 투표로 정한 세율 (0·10·30)

@@ -50,6 +50,11 @@ GL.Report = {
     }).join('');
 
     // 20년의 종합 해설
+    // 종합 해설 유형 그림 (태블릿: 해설 위 / 폰: 화면 맨 위)
+    var lifeType = GL.LIFE_TYPE(GL.App.moneyRec());
+    u.$('lifeImg').innerHTML = GL.lifeImageHtml(lifeType);
+    u.$('lifeImgTop').innerHTML = GL.lifeImageHtml(lifeType);
+
     var paras = GL.LIFE_SUMMARY(GL.App.moneyRec());
     u.$('lifeSummary').innerHTML = paras.map(function (p, i) {
       return '<p' + (i === paras.length - 1 ? ' class="sum-q"' : '') + '>' + u.esc(p) + '</p>';

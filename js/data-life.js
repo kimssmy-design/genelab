@@ -375,6 +375,7 @@ GL.LIFE_SUMMARY = function (rec) {
   if (s.side > 0) p4 = '아이에게 묻지 않고 내린 결정의 결과는 누가 책임져야 할까요?';
   else if (hasPersonality) p4 = '부모가 고른 성격도 "나"라고 할 수 있을까요?';
   else if (s.total === 0 && low) p4 = '이 아이가 가진 것 중, 돈으로 살 수 없었던 것은 무엇일까요?';
+  else if (s.total === 0) p4 = '모두가 편집하는 사회에서 "고르지 않은 선택"은 아이를 지킨 걸까요, 뒤처지게 한 걸까요?';
   else if (noneHeavy) p4 = '부모가 정말로 사고 싶었던 것은 무엇이었을까요?';
   else if (low && okEnh > 0) p4 = '부모 세대보다 앞서게 된 것은 불공정일까요, 아니면 처음으로 공정해진 걸까요?';
   else if (mid && s.enhance > 0) p4 = '모두가 한 걸음씩 앞으로 가면, 누가 앞서 간 걸까요?';
@@ -383,4 +384,45 @@ GL.LIFE_SUMMARY = function (rec) {
   else p4 = '"조금 앞선 출발"은 공정한 경쟁일까요?';
 
   return [p1, p2, p3, p4];
+};
+
+/* =========================================================
+   종합 해설 유형 (그림 8장) — 마지막 질문(p4)과 같은 기준
+   1 의도하지 않은 변화 · 2 고른 성격 · 3 고를 수 없었던 아이 · 4 기대만 남은 아이
+   5 한 계단 올라선 아이 · 6 뒤처지지 않으려는 아이 · 7 출발선 앞의 아이 · 8 치료로 건강해진 아이
+   ========================================================= */
+GL.LIFE_TYPES = {
+  1: '의도하지 않은 변화', 2: '고른 성격', 3: '고를 수 없었던 아이', 4: '기대만 남은 아이',
+  5: '한 계단 올라선 아이', 6: '뒤처지지 않으려는 아이', 7: '출발선 앞의 아이', 8: '치료로 건강해진 아이'
+};
+
+GL.LIFE_TYPE = function (rec) {
+  var picks = rec.picks || [];
+  var s = GL.sim.summarize(picks);
+  var low = rec.level <= 2, mid = rec.level === 3, high = rec.level >= 4;
+  var hasPersonality = GL.PERSONALITY_IDS.some(function (id) { return s.ids[id]; });
+  var noneN = picks.filter(function (p) { return p.status === 'none'; }).length;
+  var okEnh = picks.filter(function (p) {
+    var o = GL.optById[p.id];
+    return o && o.tag === 'enhance' && p.status === 'ok';
+  }).length;
+  if (s.side > 0) return 1;
+  if (hasPersonality) return 2;
+  if (s.total === 0) return 3;                         // 편집 없이 태어난 아이 (드물게 '고르지 않은' 경우도 함께)
+  if (noneN > 0 && noneN >= s.total / 2) return 4;
+  if (low && okEnh > 0) return 5;
+  if (mid && s.enhance > 0) return 6;
+  if (high && s.enhance > 0) return 7;
+  if (s.enhance === 0) return 8;
+  return low ? 5 : mid ? 6 : 7;                         // 향상 편집이 있지만 위에 안 걸린 드문 경우
+};
+
+/* 유형 그림: img/summary/summary-번호.jpg → 없으면 .png → 그래도 없으면 번호 칸 */
+GL.lifeImageHtml = function (type, cls) {
+  var name = GL.LIFE_TYPES[type] || '';
+  return '<div class="life-img ' + (cls || '') + '" data-type="' + type + '">' +
+    '<img src="img/summary/summary-' + type + '.jpg" alt="' + name + '" ' +
+    'onerror="if(!this.dataset.png){this.dataset.png=1;this.src=\'img/summary/summary-' + type + '.png\';}' +
+    'else{this.parentNode.classList.add(\'no-img\');this.remove();}">' +
+    '<span class="life-img-ph"><b>' + type + '</b>' + name + '</span></div>';
 };

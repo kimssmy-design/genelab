@@ -59,6 +59,9 @@ GL.ResultCard = {
           '<span class="tag tag-enh">향상 ' + s.enhance + '</span>' +
           (s.side ? '<span class="tag tag-side">변화 ' + s.side + '</span>' : '') +
         '</div>' +
+        (opts.summary && GL.LIFE_TYPE
+          ? GL.lifeImageHtml(GL.LIFE_TYPE(rec), 'rc-img') +
+            '<p class="rc-type">유형 ' + GL.LIFE_TYPE(rec) + ' · ' + GL.LIFE_TYPES[GL.LIFE_TYPE(rec)] + '</p>' : '') +
         (opts.summary && GL.LIFE_SUMMARY
           ? '<p class="rc-summary">' + u.esc(GL.LIFE_SUMMARY(rec)[0]) + '</p>' : '') +
         '<ul class="rc-picks">' + pickHtml + '</ul>' +

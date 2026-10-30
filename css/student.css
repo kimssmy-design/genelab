@@ -218,7 +218,9 @@ main { height: calc(100dvh - 52px - env(safe-area-inset-top, 0px)); }
 .story p { margin: 0 0 12px 26px; color: #3d434a; font-size: 15px; line-height: 1.75; word-break: keep-all; }
 .story.st-side .rc-pname { color: var(--danger); }
 .more-hint { margin-top: 8px; }
-.life-summary { margin-top: 18px; background: var(--paper); border: 1px solid var(--line-strong); border-radius: 14px; padding: 18px 20px; }
+.life-summary { background: var(--paper); border: 1px solid var(--line-strong); border-radius: 14px; overflow: hidden; }
+.sum-body { padding: 16px 20px 18px; }
+.news-title { margin-top: 18px; }
 .life-summary p { margin: 0 0 10px; font-size: 15px; line-height: 1.75; word-break: keep-all; }
 .life-summary .sum-q { margin: 14px 0 0; padding-left: 12px; border-left: 3px solid var(--ink); font-weight: 700; }
 
@@ -272,6 +274,45 @@ main { height: calc(100dvh - 52px - env(safe-area-inset-top, 0px)); }
 .loan-ctrl { display: grid; grid-template-columns: 44px 1fr 44px; gap: 8px; align-items: center; margin: 10px 0 4px; }
 .loan-ctrl input { width: 100%; accent-color: var(--ink); }
 
+
+.report-top-img { display: none; }
+
+/* ---------- 편지 봉투 ---------- */
+.env-view { margin: auto; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px; }
+.envelope {
+  position: relative; width: min(460px, 86vw); aspect-ratio: 3 / 2; padding: 0; cursor: pointer;
+  border: 1px solid var(--line-strong); border-radius: 10px; background: #f6f1e7;
+  box-shadow: 0 10px 30px rgba(20, 20, 20, .08); overflow: visible; perspective: 900px;
+}
+.env-flap {
+  position: absolute; left: 0; top: 0; width: 100%; height: 56%; z-index: 3;
+  background: #ece5d6; clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top center; transition: transform .6s ease;
+}
+.env-body { position: absolute; inset: 0; z-index: 2; background: #f6f1e7; border-radius: 10px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; padding-bottom: 12%; font-family: var(--serif); }
+.env-to { font-size: 20px; color: var(--ink); }
+.env-from { font-size: 14px; color: var(--muted); }
+.env-stamp { position: absolute; bottom: 14px; right: 16px; z-index: 4; font-size: 13px; padding: 6px 8px; border: 1.5px dashed var(--muted); border-radius: 4px; color: var(--muted); transform: rotate(6deg); }
+.env-paper {
+  position: absolute; left: 7%; right: 7%; top: 8%; bottom: 8%; z-index: 1; border-radius: 6px;
+  background: #fffdf8 repeating-linear-gradient(transparent 0 22px, #eee8dc 22px 23px);
+  transition: transform .5s ease .45s;
+}
+.env-tap { font-size: 13px; color: var(--muted); animation: blink 1.6s ease-in-out infinite; }
+.envelope.open .env-flap { transform: rotateX(180deg); z-index: 0; }
+.envelope.open .env-paper { transform: translateY(-58%); z-index: 3; transition: transform .5s ease .45s, z-index 0s .45s; }
+.envelope.open .env-stamp { opacity: 0; transition: opacity .3s; }
+.fade-in { animation: fadeIn .6s ease both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.letter-col { display: flex; flex-direction: column; gap: 14px; align-self: start; position: sticky; top: 0; }
+.letter-col .letter { position: static; }
+.two-col.solo { grid-template-columns: minmax(0, 680px); justify-content: center; }
+.reply-wrap { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px 0; }
+@media (prefers-reduced-motion: reduce) {
+  .env-flap, .env-paper { transition: none; }
+  .fade-in, .env-tap { animation: none; }
+}
 /* =========================================================
    세로 모드 (태블릿 세로·폰)
    ========================================================= */
@@ -304,6 +345,14 @@ main { height: calc(100dvh - 52px - env(safe-area-inset-top, 0px)); }
   .money-actions .job-ic { display: none; }
   .money-actions .btn .mono { display: none; }
   .letter { position: static; }
+  .letter-col { position: static; }
+  /* 리포트: 폰·세로에서는 그림을 화면 맨 위로 */
+  #scr-report { overflow-y: auto; }
+  #scr-report .two-col { overflow: visible; flex: none; }
+  .report-top-img { display: block; padding: 16px 20px 0; }
+  #scr-report .screen-foot { position: sticky; bottom: 0; background: linear-gradient(transparent, var(--bg) 40%); padding-top: 18px; }
+  .report-top-img .life-img { border-radius: 14px; overflow: hidden; }
+  .sum-img-wrap { display: none; }
 }
 @media (max-width: 480px) {
   /* 상단 바: 'STEP' 글자와 '사용법' 글자를 숨기고 동그란 ? 버튼만 */

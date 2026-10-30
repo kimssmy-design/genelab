@@ -131,6 +131,7 @@
 
   <!-- 3. 20년 후 리포트 -->
   <section class="screen" id="scr-report">
+    <div class="report-top-img" id="lifeImgTop"></div>
     <div class="two-col">
       <div class="pane">
         <p class="mono muted small">SUBJECT PROFILE</p>
@@ -141,12 +142,15 @@
         <p class="muted small more-hint hidden" id="moreHint">나머지 유전자는 눌러서 이야기를 펼쳐 보세요.</p>
       </div>
       <div class="pane pane-plain">
-        <p class="mono muted small">2065년의 뉴스</p>
-        <ul class="news-list" id="newsList"></ul>
         <section class="life-summary">
-          <p class="mono muted small">20년의 종합 해설</p>
-          <div id="lifeSummary"></div>
+          <div id="lifeImg" class="sum-img-wrap"></div>
+          <div class="sum-body">
+            <p class="mono muted small">20년의 종합 해설</p>
+            <div id="lifeSummary"></div>
+          </div>
         </section>
+        <p class="mono muted small news-title">2065년의 뉴스</p>
+        <ul class="news-list" id="newsList"></ul>
       </div>
     </div>
     <div class="screen-foot"><button class="btn btn-ink" id="toLetterBtn">아이에게서 온 편지</button></div>
@@ -154,13 +158,33 @@
 
   <!-- 4. 편지 + 성찰 질문 -->
   <section class="screen" id="scr-letter">
-    <div class="two-col">
-      <div class="letter">
-        <p class="letter-to">엄마, 아빠에게</p>
-        <div class="letter-text" id="letterText"></div>
-        <p class="letter-from">2065년, 스무 살이 된 아이가</p>
+    <!-- 봉투: 눌러서 열기 -->
+    <div class="env-view" id="envView">
+      <button class="envelope" id="envelope" aria-label="편지 열기">
+        <span class="env-paper"></span>
+        <span class="env-stamp mono">2065</span>
+        <span class="env-body">
+          <span class="env-to">엄마, 아빠에게</span>
+          <span class="env-from">2065년, 스무 살이 된 우리 아이</span>
+        </span>
+        <span class="env-flap"></span>
+      </button>
+      <p class="env-tap mono">눌러서 열기</p>
+    </div>
+
+    <div class="two-col hidden" id="letterView">
+      <div class="letter-col">
+        <div class="letter">
+          <p class="letter-to">엄마, 아빠에게</p>
+          <div class="letter-text" id="letterText"></div>
+          <p class="letter-from">2065년, 스무 살이 된 아이가</p>
+        </div>
+        <div class="reply-wrap hidden" id="replyWrap">
+          <p class="muted small">편지를 끝까지 읽었다면, 아이에게 답장을 써 보세요.</p>
+          <button class="btn btn-ink" id="replyBtn">답장하기</button>
+        </div>
       </div>
-      <div class="pane pane-plain">
+      <div class="pane pane-plain hidden" id="qPane">
         <div id="qForm"></div>
         <div class="prog hidden" id="submitProg">
           <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>

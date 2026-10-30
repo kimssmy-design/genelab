@@ -64,10 +64,53 @@ GL.Letter = {
       if (q.choices) GL.Letter.paintChoice(q.key);
     });
 
+    // 봉투 → 편지 → 답장하기(질문 열기)
+    // 이미 답을 쓰기 시작했거나 제출한 학생은 바로 편지와 질문을 보여 줌
+    var started = S.submitted || GL.STORY.QUESTIONS.some(function (q) { return S.answers[q.key]; });
+    if (started) { S.letterOpened = true; S.replied = true; }
+    GL.Letter.applyView();
+    u.$('envelope').onclick = GL.Letter.openEnvelope;
+    u.$('replyBtn').onclick = GL.Letter.reply;
+
     u.$('submitBtn').textContent = S.submitted ? '고친 답변 제출하기' : '제출하기';
     u.$('submitErr').textContent = '';
     u.$('submitBtn').onclick = GL.Letter.submit;
     GL.App.show('scr-letter', 4, 2065);
+  },
+
+  // 지금 상태에 맞게 봉투 / 편지 / 질문 보이기
+  applyView: function () {
+    var u = GL.util;
+    var S = GL.state;
+    u.$('envView').classList.toggle('hidden', S.letterOpened);
+    u.$('envelope').classList.remove('open');
+    u.$('letterView').classList.toggle('hidden', !S.letterOpened);
+    u.$('replyWrap').classList.toggle('hidden', !S.letterOpened || S.replied);
+    u.$('qPane').classList.toggle('hidden', !S.replied);
+    u.$('letterView').classList.toggle('solo', !S.replied);   // 답장 전에는 편지만 가운데에
+  },
+
+  openEnvelope: function () {
+    var u = GL.util;
+    var env = u.$('envelope');
+    if (env.classList.contains('open')) return;
+    env.classList.add('open');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(function () {
+      GL.state.letterOpened = true;
+      GL.App.save();
+      GL.Letter.applyView();
+      u.$('letterView').classList.add('fade-in');
+    }, reduce ? 0 : 1100);
+  },
+
+  reply: function () {
+    var u = GL.util;
+    GL.state.replied = true;
+    GL.App.save();
+    GL.Letter.applyView();
+    u.$('qPane').classList.add('fade-in');
+    u.$('qPane').scrollIntoView({ behavior: 'smooth', block: 'start' });
   },
 
   updateCount: function (key) {
